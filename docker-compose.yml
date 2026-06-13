@@ -1,0 +1,22 @@
+# API-Eye Lab - Docker Compose
+# Levanta el lab con un solo comando: docker compose up
+
+services:
+  redteam-lab:
+    build: .
+    container_name: redteam-lab
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persistir las DBs generadas (hallazgos, tracking, user_dbs) en el host
+      - ./db/data:/app/db/data
+      - ./hallazgos.json:/app/hallazgos.json
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/servidores')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

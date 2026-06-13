@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>RedTeam — DB Builder</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
+  header { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+  h1 { color: #58a6ff; margin-bottom: 6px; }
+  .back { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+  .panel h2 { color: #58a6ff; margin-bottom: 12px; font-size: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  .db-card { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 14px; cursor: pointer; transition: all 0.2s; }
+  .db-card:hover { border-color: #58a6ff; }
+  .db-card.custom { border-style: dashed; }
+  .db-card h3 { color: #79c0ff; font-size: 14px; margin-bottom: 4px; }
+  .db-card p { color: #8b949e; font-size: 12px; }
+  .db-card .meta { color: #6e7681; font-size: 11px; margin-top: 6px; }
+  .db-card .vacia { color: #d29922; font-size: 11px; font-style: italic; }
+  button { font-family: inherit; }
+  .btn { background: #238636; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+  .btn:hover { background: #2ea043; }
+  .btn-blue { background: #1f6feb; }
+  .btn-blue:hover { background: #388bfd; }
+  .btn-purple { background: #8957e5; }
+  .btn-purple:hover { background: #a371f7; }
+  input, textarea, select { background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 8px; border-radius: 4px; font-family: inherit; width: 100%; }
+  .campo { margin-bottom: 8px; }
+  .campo label { display: block; color: #8b949e; font-size: 12px; margin-bottom: 4px; }
+  .hidden { display: none; }
+  .resultado { background: #0d1117; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 12px; max-height: 500px; overflow: auto; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+  th { background: #21262d; padding: 6px; text-align: left; color: #58a6ff; }
+  td { padding: 6px; border-top: 1px solid #21262d; }
+  .recomendacion { background: #1f3a52; border-left: 3px solid #58a6ff; padding: 12px; border-radius: 4px; margin: 12px 0; font-size: 13px; line-height: 1.5; }
+  .consulta-area { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .url-generada { background: #0d1117; padding: 10px; border-radius: 4px; font-family: monospace; color: #79c0ff; margin-top: 8px; word-break: break-all; }
+</style>
+</head>
+<body>
+<a href="/" class="back">← Volver al índice</a>
+<header>
+  <h1>🗄️ DB Builder</h1>
+  <p style="color: #8b949e;">7 DBs precargadas + 3 slots para armar la tuya. La intriga: ¿qué cargaste?</p>
+</header>
+
+<!-- DBs PREDEFINIDAS -->
+<div class="panel">
+  <h2>📦 DBs precargadas (con datos)</h2>
+  <p style="color: #8b949e; font-size: 13px; margin-bottom: 12px;">Hacé clic en una para explorarla, ver su estructura y aprender a consultarla por URL.</p>
+  <div class="grid" id="dbsPredefinidas"></div>
+</div>
+
+<!-- DBs CUSTOM -->
+<div class="panel">
+  <h2>🛠️ DBs custom (para que armes la tuya)</h2>
+  <p style="color: #8b949e; font-size: 13px; margin-bottom: 12px;">3 slots vacíos. Configurá los campos (mín 3, máx 100), cargá los datos que quieras, y descubrí qué información queda expuesta al consultar por URL.</p>
+  <div class="grid" id="dbsCustom"></div>
+  <button class="btn btn-blue" onclick="mostrarFormCustom()" style="margin-top: 12px;">+ Crear nueva DB custom</button>
+</div>
+
+<!-- FORM CUSTOM -->
+<div class="panel hidden" id="formCustom">
+  <h2>🆕 Crear DB Custom</h2>
+  <div class="recomendacion">
+    <strong>💡 Recomendaciones al diseñar tu DB:</strong><br>
+    • Si vas a guardar <strong>emails</strong>: respetá el formato (usuario@dominio.com). Recomendado: dominios descriptivos o descartables (10minutemail).<br>
+    • Si vas a guardar <strong>teléfonos</strong>: incluí código de área (+54 11, +54 221, etc.) para mejor utilidad. Ajustá todo a un país.<br>
+    • Si vas a guardar <strong>IDs</strong>: usá valores "lejanos" (1000, 1001...) para que se note el patrón en la enumeración.<br>
+    • El <strong>primer campo debe llamarse "id"</strong> (es la convención del lab).<br>
+    • El sistema valida: mín 3 campos, máx 100.
+  </div>
+  <div class="campo">
+    <label>Nombre de la DB (sin espacios, sin caracteres raros)</label>
+    <input id="dbNombre" placeholder="ej: clientes_argentina">
+  </div>
+  <div class="campo">
+    <label>Campos (separados por coma). El primero DEBE ser "id"</label>
+    <input id="dbCampos" placeholder="ej: id, nombre, email, telefono, ciudad">
+  </div>
+  <div class="campo">
+    <label>Datos en formato JSON (array de objetos)</label>
+    <textarea id="dbDatos" rows="8" placeholder='[{"id": 1001, "nombre": "Juan", "email": "juan@test.com", "telefono": "+54 11 5555-1234", "ciudad": "CABA"}]'></textarea>
+  </div>
+  <button class="btn" onclick="crearDBCustom()">💾 Crear DB</button>
+  <button class="btn btn-purple" onclick="cargarEjemplo()">📋 Cargar ejemplo</button>
+</div>
+
+<!-- VISOR DE DB -->
+<div class="panel hidden" id="visorDB">
+  <h2>🔍 Visor: <span id="visorTitulo"></span></h2>
+  <div id="visorDescripcion" style="color: #8b949e; margin-bottom: 12px;"></div>
+  <div id="visorSugerencia" class="recomendacion"></div>
+
+  <!-- Botón mostrar/ocultar -->
+  <div style="margin: 12px 0;">
+    <button class="btn btn-blue" onclick="revelarDatos()">👁️ Mostrar contenido completo de la DB</button>
+    <button class="btn btn-purple" onclick="ocultarDatos()">🙈 Ocultar</button>
+  </div>
+
+  <!-- Tabla de datos -->
+  <div id="tablaDatos"></div>
+
+  <!-- Consulta por URL -->
+  <h3 style="color: #58a6ff; margin-top: 24px;">🔗 Consultar por URL (modificando la dirección)</h3>
+  <p style="color: #8b949e; font-size: 13px; margin-bottom: 8px;">La forma "real" de consultar: cambiar la URL del navegador. Acá te dejo ejemplos que podés probar.</p>
+
+  <div class="consulta-area">
+    <div>
+      <label style="color: #8b949e; font-size: 12px;">Campo a proyectar (opcional)</label>
+      <input id="consCampo" placeholder="ej: nombre,email">
+    </div>
+    <div>
+      <label style="color: #8b949e; font-size: 12px;">Filtro tipo WHERE (opcional)</label>
+      <input id="consFiltro" placeholder="ej: ciudad = 'CABA'">
+    </div>
+    <div>
+      <label style="color: #8b949e; font-size: 12px;">Límite</label>
+      <input id="consLimite" value="10" type="number">
+    </div>
+  </div>
+
+  <div class="url-generada" id="urlGenerada">// La URL se genera sola</div>
+  <button class="btn" onclick="consultar()">▶️ Ejecutar consulta</button>
+  <button class="btn btn-blue" onclick="abrirURL()">🌐 Abrir en nueva pestaña</button>
+  <button class="btn btn-purple" onclick="copiarURL()">📋 Copiar URL</button>
+
+  <div class="resultado" id="resultadoConsulta" style="margin-top: 12px;">// Acá aparece el resultado...</div>
+</div>
+
+<script>
+const SID = sessionStorage.getItem('sid') || (sessionStorage.setItem('sid', Math.random().toString(36).slice(2)), sessionStorage.getItem('sid'));
+let dbActual = null;
+
+async function track(tipo, target, contexto='') {
+  await fetch('http://127.0.0.1:8000/api/v1/track', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({tipo, target, contexto, session_id: SID})});
+}
+
+async function cargarDBs() {
+  const r = await fetch('http://127.0.0.1:8000/api/v1/dbbuilder/predefinidas');
+  const data = await r.json();
+  const cont = document.getElementById('dbsPredefinidas');
+  cont.innerHTML = data.map(d => `
+    <div class="db-card" onclick="abrirDB('${d.nombre}')">
+      <h3>📊 ${d.nombre}</h3>
+      <p>${d.descripcion}</p>
+      <div class="meta">${d.registros} registros · ${d.sugerencia_campos}</div>
+    </div>
+  `).join('');
+
+  // Slots custom
+  const r2 = await fetch('http://127.0.0.1:8000/api/v1/dbbuilder/custom');
+  const customs = await r2.json();
+  const cont2 = document.getElementById('dbsCustom');
+  const slots = [0,1,2].map(i => customs[i] ? customs[i] : null);
+  cont2.innerHTML = slots.map((s, i) => s
+    ? `<div class="db-card custom" onclick="abrirDBCustom('${s.nombre}')"><h3>🛠️ ${s.nombre}</h3><p class="meta">Custom</p></div>`
+    : `<div class="db-card custom" onclick="mostrarFormCustom()"><h3>➕ Slot ${i+1}</h3><p class="vacia">Vacío — crear</p></div>`
+  ).join('');
+}
+
+async function abrirDB(nombre) {
+  const r = await fetch(`http://127.0.0.1:8000/api/v1/dbbuilder/datos/${nombre}`);
+  const data = await r.json();
+  dbActual = {tipo: 'predefinida', nombre};
+  document.getElementById('visorTitulo').textContent = data.nombre;
+  document.getElementById('visorDescripcion').textContent = data.descripcion;
+  document.getElementById('visorSugerencia').innerHTML = `<strong>💡 Sugerencia de campos:</strong> <code>${data.sugerencia_campos}</code>`;
+  document.getElementById('visorDB').classList.remove('hidden');
+  document.getElementById('tablaDatos').innerHTML = '// Hacé clic en "Mostrar contenido" para ver los datos';
+  actualizarURLGenerada();
+  track('click', 'abrir_db', nombre);
+}
+
+async function abrirDBCustom(nombre) {
+  dbActual = {tipo: 'custom', nombre};
+  document.getElementById('visorTitulo').textContent = nombre;
+  document.getElementById('visorDescripcion').textContent = 'DB custom creada por vos';
+  document.getElementById('visorSugerencia').innerHTML = '⚠️ Esta DB tiene los datos que vos cargaste. La "intriga" es: ¿qué información dejaste expuesta?';
+  document.getElementById('visorDB').classList.remove('hidden');
+  document.getElementById('tablaDatos').innerHTML = '// Hacé clic en "Mostrar contenido" para ver los datos';
+  actualizarURLGenerada();
+  track('click', 'abrir_db_custom', nombre);
+}
+
+async function revelarDatos() {
+  if (!dbActual) return;
+  const r = await fetch(`http://127.0.0.1:8000/api/v1/dbbuilder/consultar?db=${dbActual.nombre}&limite=100`);
+  const data = await r.json();
+  if (!data.datos || data.datos.length === 0) {
+    document.getElementById('tablaDatos').innerHTML = '<em style="color:#8b949e">Sin datos.</em>';
+    return;
+  }
+  const cols = Object.keys(data.datos[0]);
+  const html = `<table>
+    <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+    <tbody>${data.datos.map(row => `<tr>${cols.map(c => `<td>${row[c]}</td>`).join('')}</tr>`).join('')}</tbody>
+  </table>`;
+  document.getElementById('tablaDatos').innerHTML = html;
+  track('click', 'revelar_datos', dbActual.nombre);
+}
+
+function ocultarDatos() {
+  document.getElementById('tablaDatos').innerHTML = '// Datos ocultos';
+}
+
+function actualizarURLGenerada() {
+  if (!dbActual) return;
+  const campo = document.getElementById('consCampo').value;
+  const filtro = document.getElementById('consFiltro').value;
+  const limite = document.getElementById('consLimite').value || 10;
+  let url = `http://127.0.0.1:8000http://127.0.0.1:8000/api/v1/dbbuilder/consultar?db=${dbActual.nombre}&limite=${limite}`;
+  if (campo) url += `&campo=${encodeURIComponent(campo)}`;
+  if (filtro) url += `&filtro=${encodeURIComponent(filtro)}`;
+  document.getElementById('urlGenerada').textContent = url;
+}
+
+['consCampo','consFiltro','consLimite'].forEach(id => {
+  document.getElementById(id).oninput = actualizarURLGenerada;
+});
+
+async function consultar() {
+  if (!dbActual) return;
+  const campo = document.getElementById('consCampo').value;
+  const filtro = document.getElementById('consFiltro').value;
+  const limite = document.getElementById('consLimite').value || 10;
+  let url = `http://127.0.0.1:8000http://127.0.0.1:8000/api/v1/dbbuilder/consultar?db=${dbActual.nombre}&limite=${limite}`;
+  if (campo) url += `&campo=${encodeURIComponent(campo)}`;
+  if (filtro) url += `&filtro=${encodeURIComponent(filtro)}`;
+  try {
+    const r = await fetch(url);
+    const data = await r.json();
+    document.getElementById('resultadoConsulta').textContent = JSON.stringify(data, null, 2);
+    track('busqueda', 'consultar_db', `db=${dbActual.nombre},filtro=${filtro}`);
+  } catch (e) {
+    document.getElementById('resultadoConsulta').textContent = 'Error: ' + e.message;
+  }
+}
+
+function abrirURL() {
+  const url = document.getElementById('urlGenerada').textContent;
+  window.open(url, '_blank');
+}
+
+function copiarURL() {
+  const url = document.getElementById('urlGenerada').textContent;
+  navigator.clipboard.writeText(url);
+  alert('URL copiada: ' + url);
+}
+
+function mostrarFormCustom() {
+  document.getElementById('formCustom').classList.remove('hidden');
+  track('click', 'mostrar_form_custom');
+}
+
+function cargarEjemplo() {
+  document.getElementById('dbNombre').value = 'clientes_argentina';
+  document.getElementById('dbCampos').value = 'id, nombre, email, telefono, ciudad, cuit';
+  document.getElementById('dbDatos').value = JSON.stringify([
+    {"id": 1001, "nombre": "Juan Pérez",      "email": "juan.perez@example.com.ar", "telefono": "+54 11 5555-1234", "ciudad": "CABA",          "cuit": "20-12345678-9"},
+    {"id": 1002, "nombre": "María González",  "email": "maria.g@test.com.ar",        "telefono": "+54 221 555-5678", "ciudad": "La Plata",      "cuit": "27-23456789-0"},
+    {"id": 1003, "nombre": "Carlos López",     "email": "carlos.lopez@example.com",   "telefono": "+54 261 555-9012", "ciudad": "Mendoza",       "cuit": "20-34567890-1"},
+    {"id": 1004, "nombre": "Ana Martínez",     "email": "ana.martinez@test.com",      "telefono": "+54 351 555-3456", "ciudad": "Córdoba",       "cuit": "27-45678901-2"},
+    {"id": 1005, "nombre": "Diego Fernández",  "email": "diego.f@example.com.ar",     "telefono": "+54 388 555-7890", "ciudad": "San Salvador de Jujuy", "cuit": "20-56789012-3"},
+  ], null, 2);
+}
+
+async function crearDBCustom() {
+  const nombre = document.getElementById('dbNombre').value.trim();
+  const camposRaw = document.getElementById('dbCampos').value.trim();
+  const datosRaw = document.getElementById('dbDatos').value.trim();
+
+  if (!nombre || !camposRaw || !datosRaw) {
+    alert('Falta nombre, campos o datos');
+    return;
+  }
+
+  const campos = camposRaw.split(',').map(c => c.trim());
+  let datos;
+  try { datos = JSON.parse(datosRaw); }
+  catch (e) { alert('JSON inválido en datos: ' + e.message); return; }
+
+  if (campos.length < 3 || campos.length > 100) {
+    alert('La DB debe tener entre 3 y 100 campos. Vos pusiste: ' + campos.length);
+    return;
+  }
+  if (!campos.includes('id')) {
+    alert('El primer campo debe llamarse "id"');
+    return;
+  }
+
+  try {
+    const r = await fetch('http://127.0.0.1:8000/api/v1/dbbuilder/crear', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nombre, campos, datos})
+    });
+    const data = await r.json();
+    if (r.ok) {
+      alert(`✅ DB "${nombre}" creada con ${datos.length} registros.`);
+      track('click', 'crear_db_custom', nombre);
+      document.getElementById('formCustom').classList.add('hidden');
+      cargarDBs();
+    } else {
+      alert('Error: ' + (data.detail || JSON.stringify(data)));
+    }
+  } catch (e) { alert('Error: ' + e.message); }
+}
+
+cargarDBs();
+track('navegacion', 'dbbuilder', 'carga');
+</script>
+</body>
+</html>

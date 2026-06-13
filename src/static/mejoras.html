@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>RedTeam — Mejoras v3.1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
+  header { background: linear-gradient(135deg, #161b22, #21262d); border: 1px solid #30363d; padding: 24px; border-radius: 8px; margin-bottom: 20px; }
+  h1 { color: #58a6ff; margin-bottom: 6px; }
+  .back { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid #30363d; }
+  .tab { padding: 12px 20px; background: transparent; color: #8b949e; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-size: 14px; font-weight: 500; }
+  .tab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+  .tab:hover { color: #c9d1d9; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin-bottom: 20px; display: none; }
+  .panel.active { display: block; }
+  .panel h2 { color: #58a6ff; margin-bottom: 12px; font-size: 20px; }
+  .panel p { color: #8b949e; line-height: 1.6; margin-bottom: 12px; }
+  button { font-family: inherit; cursor: pointer; }
+  .btn { background: #238636; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+  .btn:hover { background: #2ea043; }
+  .btn-blue { background: #1f6feb; }
+  .btn-blue:hover { background: #388bfd; }
+  .btn-purple { background: #8957e5; }
+  .btn-purple:hover { background: #a371f7; }
+  .btn-red { background: #da3633; }
+  .btn-red:hover { background: #f85149; }
+  input, textarea, select { background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 8px; border-radius: 4px; font-family: inherit; width: 100%; }
+  .campo { margin-bottom: 12px; }
+  .campo label { display: block; color: #8b949e; font-size: 12px; margin-bottom: 4px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .stack-card { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 16px; cursor: pointer; }
+  .stack-card:hover { border-color: #58a6ff; }
+  .stack-card.active { border-color: #d2a8ff; background: #1c1f26; }
+  .stack-card h3 { color: #79c0ff; margin-bottom: 4px; }
+  .stack-card p { color: #8b949e; font-size: 13px; }
+  .trace-card { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 16px; margin-bottom: 8px; cursor: pointer; }
+  .trace-card:hover { border-color: #58a6ff; }
+  .trace-card h3 { color: #d2a8ff; }
+  pre { background: #0d1117; padding: 12px; border-radius: 4px; color: #79c0ff; font-size: 12px; overflow-x: auto; white-space: pre-wrap; }
+  .capa { display: inline-block; padding: 4px 10px; margin: 4px 4px 4px 0; background: #21262d; border: 1px solid #30363d; border-radius: 4px; font-size: 12px; cursor: pointer; }
+  .capa.revealed { background: #8957e5; border-color: #d2a8ff; color: white; }
+  .revelar-btn { background: #1f6feb; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+  .badge.s5xx { background: #f85149; }
+  .badge.s4xx { background: #d29922; color: black; }
+  .badge.s2xx { background: #238636; }
+  .badge.SUSPICIOUS { background: #f85149; }
+  .badge.NORMAL { background: #238636; }
+  .session-box { background: #0d1117; border: 1px solid #d2a8ff; border-radius: 6px; padding: 16px; margin: 12px 0; }
+  .session-box code { color: #d2a8ff; font-size: 16px; }
+  .timeline { max-height: 500px; overflow-y: auto; background: #0d1117; padding: 8px; border-radius: 4px; }
+  .timeline-item { padding: 6px 8px; border-bottom: 1px solid #21262d; font-family: monospace; font-size: 11px; cursor: pointer; }
+  .timeline-item:hover { background: #1c2128; }
+  .timeline-item.suspicious { border-left: 3px solid #f85149; }
+  .user-input { background: #1f6feb; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-left: 8px; }
+</style>
+</head>
+<body>
+<a href="/" class="back">← Volver al índice</a>
+<header>
+  <h1>🚀 Mejoras v3.1 — 4 features nuevos</h1>
+  <p style="color: #8b949e;">Modo Compañía · Detective de Stack Traces · Generador por Stack · Time-Travel</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="company">👥 Modo Compañía</button>
+  <button class="tab" data-tab="detective">🕵️ Detective Stack Traces</button>
+  <button class="tab" data-tab="stack">🧬 Generador por Stack</button>
+  <button class="tab" data-tab="timetravel">⏱️ Time-Travel</button>
+</div>
+
+<!-- ========== TAB 1: MODO COMPAÑÍA ========== -->
+<div class="panel active" id="tab-company">
+  <h2>👥 Modo Compañía</h2>
+  <p>Creá una DB vacía con campos definidos, compartí el session_id con un compañero, y cada uno carga datos sin ver los del otro. Al cerrar la carga, recién se desbloquea la consulta. <strong>La intriga: cada uno tiene que adivinar qué cargó el otro.</strong></p>
+
+  <div id="company-create">
+    <h3 style="color: #d2a8ff; margin-bottom: 8px;">1. Crear sesión compartida</h3>
+    <div class="grid-2">
+      <div class="campo">
+        <label>Tu nombre</label>
+        <input id="co-creator" placeholder="ej: alice">
+      </div>
+      <div class="campo">
+        <label>Nombre de la DB</label>
+        <input id="co-dbname" placeholder="ej: clientes_secretos">
+      </div>
+    </div>
+    <div class="campo">
+      <label>Campos (separados por coma, primer campo debe ser "id")</label>
+      <input id="co-campos" value="id, nombre, email, ciudad">
+    </div>
+    <button class="btn" onclick="companyCreate()">🚀 Crear sesión</button>
+  </div>
+
+  <div id="company-session" style="display:none; margin-top: 20px;">
+    <div class="session-box">
+      <strong style="color: #d2a8ff;">🎫 Session ID:</strong> <code id="co-session-id"></code><br>
+      <strong style="color: #d2a8ff;">🔗 URL para compartir:</strong> <code id="co-share-url"></code><br>
+      <p style="margin-top: 8px; color: #d2a8ff;">📤 Mandale este ID a tu compañero para que cargue sus datos.</p>
+    </div>
+
+    <h3 style="color: #d2a8ff; margin: 16px 0 8px;">2. Cargar tus datos (privado)</h3>
+    <div class="campo">
+      <label>Tu nombre</label>
+      <input id="co-user" placeholder="tu nombre">
+    </div>
+    <div class="campo">
+      <label>Fila a agregar (JSON)</label>
+      <textarea id="co-row" rows="3">{"id": 1, "nombre": "Mi Dato 1", "email": "test@ejemplo.com", "ciudad": "CABA"}</textarea>
+    </div>
+    <button class="btn btn-blue" onclick="companyAddRow()">➕ Agregar fila</button>
+    <button class="btn btn-red" onclick="companyClose()">🔒 Cerrar carga y abrir consultas</button>
+    <button class="btn btn-purple" onclick="companyReveal()">👁️ Ver todos los datos (cuando esté cerrada)</button>
+
+    <div style="margin-top: 12px;">
+      <p>Estado actual: <span class="badge" id="co-status">ABIERTA</span></p>
+      <p>Filas cargadas: <strong id="co-count">0</strong></p>
+    </div>
+
+    <div id="co-result" style="margin-top: 12px;"></div>
+  </div>
+
+  <h3 style="color: #d2a8ff; margin-top: 24px;">📋 Sesiones existentes</h3>
+  <div id="company-list"></div>
+</div>
+
+<!-- ========== TAB 2: DETECTIVE ========== -->
+<div class="panel" id="tab-detective">
+  <h2>🕵️ Detective de Stack Traces</h2>
+  <p>Galería de errores famosos de producción. Cada uno tiene 4 capas de información sensible. Empezá sin ver nada y revelá capa por capa. <strong>La meta: entrenar el ojo para leer stack traces y priorizar qué información es sensible.</strong></p>
+
+  <h3 style="color: #d2a8ff; margin: 16px 0 8px;">📚 Elige un caso</h3>
+  <div id="detective-list"></div>
+
+  <div id="detective-detail" style="display:none; margin-top: 20px;">
+    <h2 id="det-title" style="color: #d2a8ff;"></h2>
+    <p id="det-context" style="color: #8b949e; margin-bottom: 12px;"></p>
+
+    <h3>📜 Stack trace</h3>
+    <pre id="det-stack"></pre>
+
+    <h3 style="margin-top: 16px;">🔍 Capas de información sensible</h3>
+    <p style="color: #8b949e; font-size: 13px;">Hacé clic en cada capa para revelar qué información se filtra. Ordená vos mismo cuál es la más crítica.</p>
+    <div id="det-capas"></div>
+
+    <h3 style="margin-top: 16px;">💡 Lecciones que tenés que aprender</h3>
+    <ul id="det-lecciones" style="margin-left: 20px; line-height: 1.8;"></ul>
+  </div>
+</div>
+
+<!-- ========== TAB 3: GENERADOR POR STACK ========== -->
+<div class="panel" id="tab-stack">
+  <h2>🧬 Generador de Shadow APIs por Stack</h2>
+  <p>Las shadow APIs no son aleatorias: <strong>son predecibles según el stack</strong>. Cada framework tiene sus defaults. Detectá el stack primero, después predecí las shadow APIs.</p>
+
+  <h3 style="color: #d2a8ff; margin: 16px 0 8px;">🎯 Opción A: Detector automático por headers</h3>
+  <p style="color: #8b949e; font-size: 13px;">Pegá los headers HTTP del response y el sistema adivina el stack:</p>
+  <div class="campo">
+    <label>Headers HTTP (uno por línea, formato "clave: valor")</label>
+    <textarea id="st-headers" rows="4">Server: uvicorn/0.27.1
+X-Powered-By: FastAPI
+Content-Type: application/json</textarea>
+  </div>
+  <button class="btn btn-blue" onclick="stackDetect()">🔍 Detectar stack</button>
+  <div id="st-detect-result" style="margin-top: 12px;"></div>
+
+  <h3 style="color: #d2a8ff; margin: 24px 0 8px;">🎯 Opción B: Elegí un stack manualmente</h3>
+  <div class="grid-2" id="stack-cards"></div>
+  <div id="stack-detail" style="margin-top: 16px;"></div>
+</div>
+
+<!-- ========== TAB 4: TIME-TRAVEL ========== -->
+<div class="panel" id="tab-timetravel">
+  <h2>⏱️ Modo Time-Travel</h2>
+  <p>El sistema genera <strong>30 minutos de tráfico simulado</strong> con miles de requests. Mezcla tráfico normal con un ataque oculto. <strong>Tu misión: encontrar cuándo empezó el ataque y desde qué IP.</strong></p>
+
+  <h3 style="color: #d2a8ff; margin: 16px 0 8px;">🎬 Elegí un escenario</h3>
+  <div id="tt-scenarios"></div>
+  <button class="btn" onclick="ttGenerate()" id="tt-gen-btn" style="margin-top: 8px;">▶️ Generar log de 30 min</button>
+
+  <div id="tt-stats" style="display:none; margin-top: 16px;">
+    <div class="session-box">
+      <strong style="color: #d2a8ff;">📊 Escenario:</strong> <span id="tt-scenario-name"></span><br>
+      <strong style="color: #d2a8ff;">📈 Total eventos:</strong> <span id="tt-total"></span><br>
+      <strong style="color: #d2a8ff;">🚨 Eventos sospechosos:</strong> <span id="tt-susp"></span><br>
+      <strong style="color: #d2a8ff;">🕐 Primer evento:</strong> <span id="tt-first"></span>
+    </div>
+  </div>
+
+  <div id="tt-controls" style="display:none; margin-top: 16px;">
+    <button class="btn btn-blue" onclick="ttLoad(0, false)">📋 Ver todo el log</button>
+    <button class="btn btn-purple" onclick="ttLoad(0, true)">🚨 Solo sospechosos</button>
+    <input type="number" id="tt-cursor" value="0" min="0" style="width: 100px; display: inline-block; margin: 0 8px;">
+    <button class="btn" onclick="ttLoad(parseInt(document.getElementById('tt-cursor').value), false)">Ir a página</button>
+  </div>
+
+  <div id="tt-log" style="margin-top: 16px;"></div>
+</div>
+
+<script>
+const SID = sessionStorage.getItem('sid') || (sessionStorage.setItem('sid', Math.random().toString(36).slice(2)), sessionStorage.getItem('sid'));
+
+async function track(tipo, target, contexto='') {
+  await fetch('/api/v1/track', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({tipo, target, contexto, session_id: SID})});
+}
+
+// === TABS ===
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    track('navegacion', 'mejora_'+t.dataset.tab);
+  };
+});
+
+// === TAB 1: COMPANY ===
+async function companyCreate() {
+  const creator = document.getElementById('co-creator').value.trim();
+  const dbname = document.getElementById('co-dbname').value.trim();
+  const campos = document.getElementById('co-campos').value.split(',').map(c => c.trim());
+  if (!creator || !dbname) { alert('Falta nombre o DB'); return; }
+  const r = await fetch('/api/v1/company/create', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({db_name: dbname, campos, creator_name: creator})
+  });
+  const data = await r.json();
+  if (!r.ok) { alert('Error: ' + (data.detail || JSON.stringify(data))); return; }
+  document.getElementById('co-session-id').textContent = data.session_id;
+  document.getElementById('co-share-url').textContent = data.share_url;
+  document.getElementById('company-create').style.display = 'none';
+  document.getElementById('company-session').style.display = 'block';
+  document.getElementById('co-user').value = creator;
+  sessionStorage.setItem('company_session', data.session_id);
+  track('click', 'company_create', data.session_id);
+  loadCompanyList();
+}
+
+async function companyAddRow() {
+  const sessionId = sessionStorage.getItem('company_session');
+  const user = document.getElementById('co-user').value.trim();
+  let row;
+  try { row = JSON.parse(document.getElementById('co-row').value); }
+  catch(e) { alert('JSON inválido: ' + e.message); return; }
+  const r = await fetch('/api/v1/company/add_row', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({session_id: sessionId, user_name: user, row})
+  });
+  const data = await r.json();
+  if (r.ok) {
+    document.getElementById('co-count').textContent = data.total_rows;
+    document.getElementById('co-result').innerHTML = `<p style="color: #3fb950;">✅ Fila agregada (privado). Total: ${data.total_rows}</p>`;
+    track('click', 'company_add_row', sessionId);
+  } else {
+    alert('Error: ' + (data.detail || JSON.stringify(data)));
+  }
+}
+
+async function companyClose() {
+  const sessionId = sessionStorage.getItem('company_session');
+  await fetch('/api/v1/company/close/' + sessionId, {method: 'POST'});
+  document.getElementById('co-status').textContent = 'CERRADA';
+  document.getElementById('co-status').className = 'badge s5xx';
+  track('click', 'company_close', sessionId);
+}
+
+async function companyReveal() {
+  const sessionId = sessionStorage.getItem('company_session');
+  const r = await fetch('/api/v1/company/data/' + sessionId);
+  const data = await r.json();
+  if (data.status !== 'closed') {
+    document.getElementById('co-result').innerHTML = `<p style="color: #d29922;">⚠️ La sesión está ABIERTA. Primero cerrá la carga.</p>`;
+    return;
+  }
+  let html = `<h4 style="color: #d2a8ff;">📊 Datos de la DB "${data.db_name}":</h4><pre>${JSON.stringify(data.datos, null, 2)}</pre>`;
+  document.getElementById('co-result').innerHTML = html;
+  track('click', 'company_reveal', sessionId);
+}
+
+async function loadCompanyList() {
+  const r = await fetch('/api/v1/company/list');
+  const data = await r.json();
+  document.getElementById('company-list').innerHTML = data.length === 0
+    ? '<p style="color: #8b949e;">Sin sesiones todavía.</p>'
+    : data.map(s => `<div class="trace-card" onclick="joinSession('${s.session_id}')">
+        <h3>${s.db_name}</h3>
+        <p>👤 ${s.creator} · ${s.rows} filas · <span class="badge ${s.status==='closed'?'s5xx':'s2xx'}">${s.status.toUpperCase()}</span></p>
+        <p style="color: #8b949e; font-size: 11px;">Session: ${s.session_id}</p>
+      </div>`).join('');
+}
+
+function joinSession(sid) {
+  sessionStorage.setItem('company_session', sid);
+  document.getElementById('co-session-id').textContent = sid;
+  document.getElementById('co-share-url').textContent = '/mejoras.html';
+  document.getElementById('company-create').style.display = 'none';
+  document.getElementById('company-session').style.display = 'block';
+  // cargar estado
+  fetch('/api/v1/company/data/' + sid).then(r => r.json()).then(d => {
+    document.getElementById('co-count').textContent = d.total;
+    document.getElementById('co-status').textContent = d.status.toUpperCase();
+    document.getElementById('co-status').className = 'badge ' + (d.status==='closed'?'s5xx':'s2xx');
+  });
+}
+
+// === TAB 2: DETECTIVE ===
+async function loadDetectiveList() {
+  const r = await fetch('/api/v1/detective/list');
+  const data = await r.json();
+  document.getElementById('detective-list').innerHTML = data.map(t => `
+    <div class="trace-card" onclick="detectiveShow(${t.id})">
+      <h3>${t.titulo}</h3>
+      <span class="badge s5xx">${t.status}</span>
+    </div>
+  `).join('');
+}
+
+async function detectiveShow(id) {
+  const r = await fetch('/api/v1/detective/' + id);
+  const t = await r.json();
+  document.getElementById('det-title').textContent = t.titulo;
+  document.getElementById('det-context').textContent = t.contexto;
+  document.getElementById('det-stack').textContent = t.stack.join('\\n');
+  document.getElementById('det-capas').innerHTML = t.pistas_por_capa.map((c, i) => `
+    <span class="capa" data-capa="${i}" onclick="this.classList.toggle('revealed'); this.textContent = this.classList.contains('revealed') ? '✅ Capa ${c.capa}: ${c.revelar}' : '🔒 Capa ${c.capa} (oculta)'">
+      🔒 Capa ${c.capa} (oculta)
+    </span>
+  `).join('');
+  document.getElementById('det-lecciones').innerHTML = t.lecciones.map(l => `<li>${l}</li>`).join('');
+  document.getElementById('detective-detail').style.display = 'block';
+  track('click', 'detective_show', 'caso_'+id);
+}
+
+// === TAB 3: STACK ===
+async function stackDetect() {
+  const headers = document.getElementById('st-headers').value;
+  const r = await fetch('/api/v1/stack/detect?headers=' + encodeURIComponent(headers));
+  const data = await r.json();
+  if (!data.best_guess) {
+    document.getElementById('st-detect-result').innerHTML = '<p style="color: #d29922;">No se pudo detectar el stack con esos headers.</p>';
+    return;
+  }
+  const g = data.best_guess;
+  document.getElementById('st-detect-result').innerHTML = `
+    <div class="session-box">
+      <strong style="color: #d2a8ff;">🎯 Stack detectado:</strong> ${g.framework} (${g.stack_id})<br>
+      <strong style="color: #d2a8ff;">📊 Score:</strong> ${g.score}<br>
+      <strong style="color: #d2a8ff;">🔍 Headers que matchearon:</strong> ${g.matched_headers.join(', ')}<br>
+      <strong style="color: #d2a8ff;">👇 Shadow APIs probables para este stack:</strong>
+      <pre>${JSON.stringify(STACK_PROFILES[g.stack_id].shadow_apis_comunes, null, 2)}</pre>
+    </div>
+  `;
+  track('click', 'stack_detect', g.stack_id);
+}
+
+const STACK_PROFILES = {};
+async function loadStacks() {
+  const r = await fetch('/api/v1/stack/list');
+  const list = await r.json();
+  // Pre-cargar cada uno
+  for (const s of list) {
+    const r2 = await fetch('/api/v1/stack/' + s.id);
+    STACK_PROFILES[s.id] = await r2.json();
+  }
+  document.getElementById('stack-cards').innerHTML = list.map(s => `
+    <div class="stack-card" onclick="stackShow('${s.id}')" id="sc-${s.id}">
+      <h3>${s.framework}</h3>
+      <p>${s.lenguaje}</p>
+    </div>
+  `).join('');
+}
+
+function stackShow(id) {
+  document.querySelectorAll('.stack-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('sc-'+id).classList.add('active');
+  const p = STACK_PROFILES[id];
+  document.getElementById('stack-detail').innerHTML = `
+    <h3 style="color: #d2a8ff;">${p.framework} — ${p.lenguaje}</h3>
+    <p><strong>Headers firma:</strong> <code>${p.firma_headers.join(', ')}</code></p>
+    <h4 style="color: #d2a8ff; margin-top: 12px;">🕵️ Shadow APIs típicas de este stack:</h4>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr style="background: #21262d;"><th style="text-align: left; padding: 8px;">Path</th><th style="text-align: left; padding: 8px;">Descripción</th></tr>
+      ${p.shadow_apis_comunes.map(s => `<tr><td style="padding: 6px;"><code>${s.path}</code></td><td style="padding: 6px; color: #8b949e;">${s.descripcion}</td></tr>`).join('')}
+    </table>
+  `;
+  track('click', 'stack_show', id);
+}
+
+// === TAB 4: TIME-TRAVEL ===
+async function loadScenarios() {
+  const r = await fetch('/api/v1/timetravel/scenarios');
+  const data = await r.json();
+  document.getElementById('tt-scenarios').innerHTML = data.map(s => `
+    <div class="trace-card" onclick="selectScenario(${s.id})" id="tt-s-${s.id}">
+      <h3>#${s.id} — ${s.name}</h3>
+      <p>${s.description}</p>
+    </div>
+  `).join('');
+}
+
+let selectedScenario = 1;
+function selectScenario(id) {
+  selectedScenario = id;
+  document.querySelectorAll('[id^="tt-s-"]').forEach(c => c.classList.remove('active'));
+  document.getElementById('tt-s-'+id).style.borderColor = '#d2a8ff';
+}
+
+async function ttGenerate() {
+  const r = await fetch('/api/v1/timetravel/generate/' + selectedScenario, {method: 'POST'});
+  const data = await r.json();
+  document.getElementById('tt-stats').style.display = 'block';
+  document.getElementById('tt-scenario-name').textContent = data.scenario;
+  document.getElementById('tt-total').textContent = data.total_events;
+  document.getElementById('tt-susp').textContent = data.suspicious_events;
+  document.getElementById('tt-first').textContent = data.first_event;
+  document.getElementById('tt-controls').style.display = 'block';
+  track('click', 'timetravel_generate', 'escenario_'+selectedScenario);
+  ttLoad(0, false);
+}
+
+async function ttLoad(cursor, onlySusp) {
+  const r = await fetch('/api/v1/timetravel/log?cursor=' + cursor + '&limit=50&only_suspicious=' + onlySusp);
+  const data = await r.json();
+  document.getElementById('tt-log').innerHTML = `
+    <h3 style="color: #d2a8ff; margin-bottom: 8px;">${onlySusp ? '🚨 Eventos sospechosos' : '📋 Log completo'} (${data.length} eventos)</h3>
+    <div class="timeline">
+      ${data.map(e => `
+        <div class="timeline-item ${e.suspicious ? 'suspicious' : ''}" onclick="ttReplay(${e.id})">
+          <span class="badge ${e.suspicious ? 'SUSPICIOUS' : 'NORMAL'}">${e.suspicious ? '🚨' : '✅'}</span>
+          <span style="color: #8b949e;">${(e.timestamp||'').substring(11,19)}</span>
+          <code>${e.method} ${e.path}</code> →
+          <span class="badge ${e.status_code >= 500 ? 's5xx' : e.status_code >= 400 ? 's4xx' : 's2xx'}">${e.status_code}</span>
+          <span style="color: #6e7681;"> · ${e.ip} · ${(e.user_agent||'').substring(0,30)}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  track('click', 'timetravel_view', onlySusp ? 'suspicious' : 'all');
+}
+
+async function ttReplay(id) {
+  const r = await fetch('/api/v1/timetravel/replay/' + id);
+  const data = await r.json();
+  alert(`📍 Evento #${id}\\n\\n${JSON.stringify(data.event, null, 2)}\\n\\n📜 Contexto (5 antes + 5 después) cargado. ¿Querés que abra el detalle completo?`);
+  track('click', 'timetravel_replay', 'event_'+id);
+}
+
+// Init
+loadCompanyList();
+loadDetectiveList();
+loadStacks();
+loadScenarios();
+track('navegacion', 'mejoras', 'carga');
+</script>
+<script src="brightness.js"></script>
+</body>
+</html>

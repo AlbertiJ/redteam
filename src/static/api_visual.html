@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>RedTeam — API Visual Playground</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
+  header { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+  h1 { color: #58a6ff; margin-bottom: 6px; }
+  .back { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+  .panel h2 { color: #58a6ff; margin-bottom: 12px; font-size: 18px; }
+  .url-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+  .url-bar input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: #79c0ff; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 14px; }
+  .url-bar button { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+  .quick-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .quick-btn { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: monospace; }
+  .quick-btn:hover { background: #30363d; border-color: #58a6ff; }
+  .quick-btn.shadow { border-color: #8957e5; color: #d2a8ff; }
+  .response { background: #0d1117; padding: 16px; border-radius: 4px; font-family: monospace; font-size: 12px; max-height: 600px; overflow: auto; white-space: pre-wrap; }
+  .status { display: inline-block; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 8px; }
+  .s2xx { background: #238636; }
+  .s4xx { background: #d29922; color: black; }
+  .s5xx { background: #f85149; }
+  .historial { background: #0d1117; padding: 10px; border-radius: 4px; max-height: 200px; overflow: auto; font-family: monospace; font-size: 11px; }
+  .historial-item { padding: 4px 0; border-bottom: 1px solid #21262d; cursor: pointer; }
+  .historial-item:hover { color: #58a6ff; }
+  .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-right: 6px; }
+  .tag.SHADOW { background: #8957e5; }
+  .tag.SWAGGER { background: #1f6feb; }
+</style>
+</head>
+<body>
+<a href="/" class="back">← Volver al índice</a>
+<header>
+  <h1>🔍 API Visual Playground</h1>
+  <p style="color: #8b949e;">Modificá la URL, descubrí shadow APIs, inyectá payloads. Todo en el browser.</p>
+</header>
+
+<div class="panel">
+  <h2>🎯 URL activa</h2>
+  <div class="url-bar">
+    <input id="url" value="http://127.0.0.1:8000http://127.0.0.1:8000/api/v1/servidores" placeholder="Pegá o escribí la URL acá">
+    <button onclick="ejecutar()">▶️ Ir</button>
+  </div>
+  <div class="quick-buttons">
+    <span style="color: #8b949e; font-size: 12px; margin-right: 8px;">📋 Endpoints oficiales (en Swagger):</span>
+    <button class="quick-btn" onclick="setURL('/')">/</button>
+    <button class="quick-btn" onclick="setURL('http://127.0.0.1:8000/api/v1/servidores')">http://127.0.0.1:8000/api/v1/servidores</button>
+    <button class="quick-btn" onclick="setURL('http://127.0.0.1:8000/api/v1/servidores/1')">http://127.0.0.1:8000/api/v1/servidores/1</button>
+    <button class="quick-btn" onclick="setURL('http://127.0.0.1:8000/api/v1/servidores/4')">http://127.0.0.1:8000/api/v1/servidores/4</button>
+    <button class="quick-btn" onclick="setURL('http://127.0.0.1:8000/api/v1/auditoria/infraestructura?sqli=on&xxe=on&ssrf=on&cmdi=on')">/auditoria (todos)</button>
+    <button class="quick-btn" onclick="setURL('/docs')">/docs (Swagger)</button>
+    <button class="quick-btn" onclick="setURL('/openapi.json')">/openapi.json</button>
+  </div>
+  <div class="quick-buttons">
+    <span style="color: #8b949e; font-size: 12px; margin-right: 8px;">🕵️ Shadow APIs (NO en Swagger, ¡a ver si las encontrás!):</span>
+    <button class="quick-btn shadow" onclick="setURL('http://127.0.0.1:8000/api/v1/internal/health')">http://127.0.0.1:8000/api/v1/internal/health</button>
+    <button class="quick-btn shadow" onclick="setURL('http://127.0.0.1:8000/api/v1/debug')">http://127.0.0.1:8000/api/v1/debug</button>
+    <button class="quick-btn shadow" onclick="setURL('/api/v0/servidores')">/api/v0/servidores</button>
+    <button class="quick-btn shadow" onclick="setURL('http://127.0.0.1:8000/api/v1/servidores/deprecados')">http://127.0.0.1:8000/api/v1/servidores/deprecados</button>
+    <button class="quick-btn shadow" onclick="setURL('http://127.0.0.1:8000/api/v1/auth/admin')">http://127.0.0.1:8000/api/v1/auth/admin</button>
+    <button class="quick-btn shadow" onclick="setURL('http://127.0.0.1:8000/api/v1/internal/admin/panel')">http://127.0.0.1:8000/api/v1/internal/admin/panel</button>
+    <button class="quick-btn shadow" onclick="setURL('http://127.0.0.1:8000/api/v1/test')">http://127.0.0.1:8000/api/v1/test</button>
+    <button class="quick-btn shadow" onclick="setURL('http://127.0.0.1:8000/api/v1/metadatos')">http://127.0.0.1:8000/api/v1/metadatos</button>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>📡 Respuesta</h2>
+  <div id="status" class="status s2xx">—</div>
+  <div class="response" id="response">// Hacé clic en una URL o escribí una propia</div>
+</div>
+
+<div class="panel">
+  <h2>🕒 Historial de esta sesión</h2>
+  <div class="historial" id="historial">// Vacío</div>
+  <button onclick="limpiarHistorial()" style="margin-top: 8px; background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 6px 12px; border-radius: 4px; cursor: pointer;">🗑️ Limpiar</button>
+</div>
+
+<script>
+const SID = sessionStorage.getItem('sid') || (sessionStorage.setItem('sid', Math.random().toString(36).slice(2)), sessionStorage.getItem('sid'));
+const SWAGGER_PATHS = new Set(['/', 'http://127.0.0.1:8000/api/v1/servidores', 'http://127.0.0.1:8000/api/v1/servidores/{servidor_id}', 'http://127.0.0.1:8000/api/v1/auditoria/infraestructura', '/docs', '/openapi.json', '/redoc']);
+
+function setURL(path) {
+  const full = path.startsWith('http') ? path : 'http://127.0.0.1:8000' + path;
+  document.getElementById('url').value = full;
+  ejecutar();
+}
+
+async function track(tipo, target, contexto='') {
+  await fetch('http://127.0.0.1:8000/api/v1/track', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({tipo, target, contexto, session_id: SID})});
+}
+
+async function ejecutar() {
+  const url = document.getElementById('url').value;
+  const path = url.replace('http://127.0.0.1:8000', '').split('?')[0];
+  const isShadow = ![...SWAGGER_PATHS].some(s => path === s || path.startsWith(s.replace('{servidor_id}', '')));
+
+  const startTime = Date.now();
+  try {
+    const r = await fetch(url);
+    const elapsed = Date.now() - startTime;
+    const text = await r.text();
+    let pretty = text;
+    try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch {}
+
+    const statusEl = document.getElementById('status');
+    statusEl.className = 'status ' + (r.status >= 500 ? 's5xx' : r.status >= 400 ? 's4xx' : 's2xx');
+    statusEl.textContent = `${r.status} ${r.statusText} · ${elapsed}ms`;
+
+    document.getElementById('response').textContent = pretty;
+    agregarHistorial(path, r.status, isShadow);
+    track('busqueda', path, `status=${r.status},shadow=${isShadow}`);
+  } catch (e) {
+    document.getElementById('response').textContent = 'Error: ' + e.message;
+  }
+}
+
+function agregarHistorial(path, status, isShadow) {
+  const hist = JSON.parse(sessionStorage.getItem('historial') || '[]');
+  hist.unshift({path, status, shadow: isShadow, t: new Date().toLocaleTimeString()});
+  sessionStorage.setItem('historial', JSON.stringify(hist.slice(0, 50)));
+  renderHistorial();
+}
+
+function renderHistorial() {
+  const hist = JSON.parse(sessionStorage.getItem('historial') || '[]');
+  const cont = document.getElementById('historial');
+  if (hist.length === 0) { cont.textContent = '// Vacío'; return; }
+  cont.innerHTML = hist.map(h =>
+    `<div class="historial-item" onclick="setURL('${h.path}')">
+      <span class="tag ${h.shadow ? 'SHADOW' : 'SWAGGER'}">${h.shadow ? '🕵️ SHADOW' : 'SWAGGER'}</span>
+      <span style="color: ${h.status >= 500 ? '#f85149' : h.status >= 400 ? '#d29922' : '#3fb950'}">${h.status}</span>
+      <code>${h.path}</code>
+      <span style="color: #6e7681"> — ${h.t}</span>
+    </div>`
+  ).join('');
+}
+
+function limpiarHistorial() {
+  sessionStorage.removeItem('historial');
+  renderHistorial();
+}
+
+renderHistorial();
+setURL('http://127.0.0.1:8000/api/v1/servidores');
+track('navegacion', 'api_visual', 'carga');
+</script>
+</body>
+</html>

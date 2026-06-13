@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>RedTeam Lab v3.1 — Índice</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 30px; }
+  h1 { color: #58a6ff; font-size: 32px; margin-bottom: 8px; }
+  .sub { color: #8b949e; margin-bottom: 30px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; transition: all 0.2s; cursor: pointer; }
+  .card:hover { transform: translateY(-4px); border-color: #58a6ff; }
+  .card h2 { color: #58a6ff; font-size: 18px; margin-bottom: 8px; }
+  .card p { color: #8b949e; font-size: 14px; line-height: 1.5; }
+  .icon { font-size: 32px; margin-bottom: 12px; }
+  a { text-decoration: none; color: inherit; }
+  footer { text-align: center; color: #6e7681; margin-top: 40px; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>🛰️ RedTeam Lab v3.1</h1>
+<p class="sub">Laboratorio de API Discovery, Shadow API Detection & DB Manipulation</p>
+
+<div class="grid">
+  <a href="/practicas.html">
+    <div class="card">
+      <div class="icon">🎯</div>
+      <h2>Menú de Práctica</h2>
+      <p>Activá vectores de ataque, ajustá la dificultad, lanzá escenarios paso a paso. Todo visual, sin consola.</p>
+    </div>
+  </a>
+  <a href="/dbbuilder.html">
+    <div class="card">
+      <div class="icon">🗄️</div>
+      <h2>DB Builder</h2>
+      <p>7 DBs precargadas (música, películas, países...) + 3 slots para que armes la tuya. Mín 3 campos, máx 100.</p>
+    </div>
+  </a>
+  <a href="/api_visual.html">
+    <div class="card">
+      <div class="icon">🔍</div>
+      <h2>API Visual</h2>
+      <p>Playground para probar la API. Modificá la URL, descubrí shadow APIs, inyectá payloads. Todo en el browser.</p>
+    </div>
+  </a>
+  <a href="/errores.html">
+    <div class="card">
+      <div class="icon">📚</div>
+      <h2>Doc de Errores</h2>
+      <p>Catálogo de códigos HTTP con explicación, qué significa en pentesting, y ejemplos reales del lab.</p>
+    </div>
+  </a>
+  <a href="/dashboard.html">
+    <div class="card">
+      <div class="icon">📊</div>
+      <h2>Dashboard</h2>
+      <p>Visualizá los hallazgos del discovery: shadow APIs, severidad, categorías. Auto-refresh.</p>
+    </div>
+  </a>
+  <a href="/docs">
+    <div class="card">
+      <div class="icon">📋</div>
+      <h2>Swagger Oficial</h2>
+      <p>El Swagger público (incompleto a propósito). Comparalo con las shadow APIs que encontraste.</p>
+    </div>
+  </a>
+</div>
+
+<footer>
+  RedTeam Lab v3.0 — Laboratorio local de pentesting ético
+</footer>
+
+<script>
+  // Tracking de clicks en el index
+  fetch('http://127.0.0.1:8000/api/v1/track', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      tipo: 'navegacion',
+      target: 'index',
+      contexto: 'carga_inicial',
+      session_id: sessionStorage.getItem('sid') || (sessionStorage.setItem('sid', Math.random().toString(36).slice(2)), sessionStorage.getItem('sid'))
+    })
+  });
+</script>
+</body>
+</html>

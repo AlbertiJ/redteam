@@ -168,6 +168,7 @@
   <script src="/static/theme.js"></script>
   <script src="/static/tour.js"></script>
   <script src="/static/sidebar.js"></script>
+  <script src="/static/auth.js"></script>
 </head>
 <body>
   <div class="brightness-bar" id="brightnessBar" style="display:none;">
@@ -581,6 +582,21 @@
           alert(`✅ DB "${nombre}" creada con ${datos.length} registros.`);
           track('click', 'crear_db_custom', nombre);
           document.getElementById('formCustom').classList.add('hidden');
+          // Sincronizar con el server (si hay usuario logueado)
+          if (window.RedTeamAuth && window.RedTeamAuth.usuario) {
+            fetch('/api/v1/auth/db-custom', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({nombre: window.RedTeamAuth.usuario, db_nombre: nombre})
+            }).catch(e => console.warn('No se pudo sincronizar DB:', e));
+            try {
+              const customs = JSON.parse(localStorage.getItem('redteam-custom-dbs') || '[]');
+              if (!customs.includes(nombre)) {
+                customs.push(nombre);
+                localStorage.setItem('redteam-custom-dbs', JSON.stringify(customs));
+              }
+            } catch (e) {}
+          }
           cargarDBs();
         } else {
           alert('Error: ' + (data.detail || JSON.stringify(data)));

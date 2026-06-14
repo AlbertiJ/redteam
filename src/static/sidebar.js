@@ -137,6 +137,41 @@
     const customs = getCustomDBs();
     const nota = localStorage.getItem(KEY_NOTAS) || '';
 
+    // Sincronizar con el server (si hay cookie de sesión)
+    // Usamos un flag para no hacer fetch en cada render
+    if (!window.RedTeamAuth || !window.RedTeamAuth.usuario) {
+      renderSidebarDOM(resueltos, customs, nota);
+      return;
+    }
+    // Traer dashboard del server para mantener sincronía
+    fetch('/api/v1/auth/mi-dashboard').then(r => r.ok ? r.json() : null).then(serverData => {
+      if (serverData) {
+        // Si el server tiene datos, usar esos como fuente de verdad
+        // pero solo si el localStorage está vacío (primera vez)
+        const serverBugs = serverData.bugs_resueltos || [];
+        const localBugs = JSON.parse(localStorage.getItem(KEY_DETECTIVE) || '[]');
+        if (localBugs.length === 0 && serverBugs.length > 0) {
+          localStorage.setItem(KEY_DETECTIVE, JSON.stringify(serverBugs));
+        }
+        const serverDBs = serverData.dbs_custom || [];
+        const localDBs = JSON.parse(localStorage.getItem(KEY_CUSTOM_DBS) || '[]');
+        if (localDBs.length === 0 && serverDBs.length > 0) {
+          localStorage.setItem(KEY_CUSTOM_DBS, JSON.stringify(serverDBs));
+        }
+        // Re-leer del localStorage
+        renderSidebarDOM(
+          getDetectiveResueltos(),
+          getCustomDBs(),
+          nota
+        );
+      } else {
+        renderSidebarDOM(resueltos, customs, nota);
+      }
+    }).catch(() => renderSidebarDOM(resueltos, customs, nota));
+  }
+
+  function renderSidebarDOM(resueltos, customs, nota) {
+
     const bugs = [
       {id: '1a', nombre: '1A · URL duplicada'},
       {id: '1b', nombre: '1B · URL concatenada'},

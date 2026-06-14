@@ -13,19 +13,31 @@ Microservicio FastAPI con:
 Levanta con:  python mi_api_local.py
 """
 
-from fastapi import FastAPI, HTTPException, Request, Query
+from fastapi import FastAPI, HTTPException, Request, Query, Cookie, Response
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import uvicorn
 from mejoras import router as mejoras_router
+from usuarios import login as usuario_login, logout as usuario_logout, cargar_usuario, guardar_usuario, obtener_dashboard, registrar_bug_resuelto, registrar_db_custom, sumar_tiempo, obtener_ranking
 import json
 import os
 import time
 import sqlite3
+import logging
 from datetime import datetime
 from pathlib import Path
+
+# === LOGGING ===
+LOG_FILE = BASE_DIR / "redteam.log" if (BASE_DIR := Path(__file__).parent.parent).exists() else Path("redteam.log")
+logging.basicConfig(
+    filename=str(LOG_FILE),
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+log = logging.getLogger("redteam")
 
 # =========================================================================
 # CONFIGURACIÓN
@@ -111,7 +123,7 @@ HTMLS_LAB = [
     "practicas.html", "dbbuilder.html", "api_visual.html",
     "dashboard.html", "errores.html", "mejoras.html",
     "detective.html", "wizard.html", "historial.html",
-    "resumen-visual.html"
+    "resumen-visual.html", "ranking.html"
 ]
 
 @app.get("/{nombre_html}", response_class=HTMLResponse, tags=["HTMLs"])
@@ -729,6 +741,99 @@ def leer_html(nombre: str) -> str:
 # =========================================================================
 # ENTRYPOINT
 # =========================================================================
+
+# =========================================================================
+# AUTH (LOGIN/LOGOUT SIMPLE — sin password, didáctico)
+# =========================================================================
+
+class LoginBody(BaseModel):
+    nombre: str
+
+class LogoutBody(BaseModel):
+    nombre: str
+    duracion_segundos: int = 0
+
+class BugResueltoBody(BaseModel):
+    nombre: str
+    bug_id: str
+
+class DBCustomBody(BaseModel):
+    nombre: str
+    db_nombre: str
+
+@app.post("/api/v1/auth/login", tags=["Auth"])
+def auth_login(body: LoginBody, response: Response):
+    """Loguea al usuario. Crea el archivo JSON si no existe.
+    Setea cookie 'rt_usuario' con el nombre."""
+    if not body.nombre or len(body.nombre) < 2 or len(body.nombre) > 30:
+        raise HTTPException(400, "El nombre tiene que tener entre 2 y 30 caracteres.")
+    res = usuario_login(body.nombre)
+    response.set_cookie(key="rt_usuario", value=body.nombre.lower(), max_age=86400 * 30, httponly=True, samesite="lax")
+    log.info(f"LOGIN: {body.nombre} (nuevo={res['nuevo']})")
+    return {
+        "ok": True,
+        "nuevo": res["nuevo"],
+        "mensaje": res["mensaje"],
+        "nombre": body.nombre.lower(),
+    }
+
+@app.post("/api/v1/auth/logout", tags=["Auth"])
+def auth_logout(body: LogoutBody, response: Response):
+    """Cierra sesión: suma el tiempo activo al total, actualiza ultima_sesion."""
+    data = usuario_logout(body.nombre, body.duracion_segundos)
+    response.delete_cookie("rt_usuario")
+    log.info(f"LOGOUT: {body.nombre} (sumó {body.duracion_segundos}s)")
+    return {
+        "ok": True,
+        "tiempo_total_legible": data["tiempo_total_segundos"] // 60 if data["tiempo_total_segundos"] >= 60 else f"{data['tiempo_total_segundos']}s",
+        "tiempo_total_segundos": data["tiempo_total_segundos"],
+        "ultima_sesion": data["ultima_sesion"],
+    }
+
+@app.get("/api/v1/auth/quien-soy", tags=["Auth"])
+def auth_quien_soy(rt_usuario: Optional[str] = Cookie(default=None)):
+    """Dice quién está logueado (lee cookie). Si no, devuelve null."""
+    if not rt_usuario:
+        return {"logueado": False, "nombre": None}
+    return {"logueado": True, "nombre": rt_usuario}
+
+@app.post("/api/v1/auth/sumar-tiempo", tags=["Auth"])
+def auth_sumar_tiempo(body: LogoutBody):
+    """Suma tiempo sin cerrar sesión (para cron de actividad)."""
+    sumar_tiempo(body.nombre, body.duracion_segundos)
+    return {"ok": True}
+
+@app.get("/api/v1/auth/mi-dashboard", tags=["Auth"])
+def auth_dashboard(rt_usuario: Optional[str] = Cookie(default=None)):
+    """Devuelve tiempo total, progreso del Detective, pendientes, dbs custom."""
+    if not rt_usuario:
+        raise HTTPException(401, "No estás logueado. Hacé click en 'Hola, soy ___' arriba a la derecha.")
+    return obtener_dashboard(rt_usuario)
+
+@app.post("/api/v1/auth/bug-resuelto", tags=["Auth"])
+def auth_bug_resuelto(body: BugResueltoBody, rt_usuario: Optional[str] = Cookie(default=None)):
+    """Registra un bug como resuelto en el archivo del usuario."""
+    if not rt_usuario or rt_usuario != body.nombre.lower():
+        raise HTTPException(401, "No estás logueado con ese nombre.")
+    data = registrar_bug_resuelto(body.nombre, body.bug_id)
+    return {"ok": True, "bugs_resueltos": data["bugs_resueltos"]}
+
+@app.post("/api/v1/auth/db-custom", tags=["Auth"])
+def auth_db_custom(body: DBCustomBody, rt_usuario: Optional[str] = Cookie(default=None)):
+    """Registra una DB custom creada."""
+    if not rt_usuario or rt_usuario != body.nombre.lower():
+        raise HTTPException(401, "No estás logueado con ese nombre.")
+    data = registrar_db_custom(body.nombre, body.db_nombre)
+    return {"ok": True, "dbs_custom": data["dbs_custom"]}
+
+@app.get("/api/v1/auth/ranking", tags=["Auth"])
+def auth_ranking():
+    """Devuelve el ranking de usuarios ordenado por score (tiempo + bugs + dbs)."""
+    usuarios = obtener_ranking()
+    return {
+        "total_usuarios": len(usuarios),
+        "usuarios": usuarios
+    }
 
 if __name__ == "__main__":
     print("=" * 60)

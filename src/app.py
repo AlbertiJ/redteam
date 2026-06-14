@@ -110,7 +110,8 @@ def raiz():
 HTMLS_LAB = [
     "practicas.html", "dbbuilder.html", "api_visual.html",
     "dashboard.html", "errores.html", "mejoras.html",
-    "detective.html", "wizard.html", "historial.html"
+    "detective.html", "wizard.html", "historial.html",
+    "resumen-visual.html"
 ]
 
 @app.get("/{nombre_html}", response_class=HTMLResponse, tags=["HTMLs"])
@@ -746,5 +747,6 @@ if __name__ == "__main__":
     print("  /static/detective.html  → Detective de Bugs (10 bugs)")
     print("  /static/historial.html  → bitácora honesta del proyecto")
     print("  /static/errores.html    → documentación por código de error")
+    print("  /static/resumen-visual.html → mapa visual del lab (entregable A)")
     print("=" * 60)
     uvicorn.run(app, host="127.0.0.1", port=8000)

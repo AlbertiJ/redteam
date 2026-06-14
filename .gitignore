@@ -35,3 +35,6 @@ hallazgos.json
 
 # Sistema
 Thumbs.db
+src/db/
+src/db/activity.db
+src/db/time_travel.db

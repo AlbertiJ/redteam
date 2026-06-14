@@ -6,6 +6,82 @@
   <title>Detective de Bugs — RedTeam Lab v4</title>
   <link rel="stylesheet" href="/static/style-colors.css">
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    /* Detective: estilo específico */
+    .bug-card {
+      background: var(--bg-card, #ffffff);
+      border: 1px solid var(--border-soft, #dadde1);
+      border-left: 4px solid var(--color-info, #f59f00);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin: 0.8rem 0;
+    }
+    .bug-card.resuelto { border-left-color: var(--color-exito, #10b981); opacity: 0.85; }
+    .bug-num {
+      display: inline-block;
+      background: var(--accent, #1877f2);
+      color: white;
+      padding: 0.15rem 0.6rem;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-right: 0.4rem;
+    }
+    .bug-dificultad {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .bug-dificultad.baja { background: #d8f5d8; color: #2a6a2a; }
+    .bug-dificultad.media { background: var(--bg-soft, #f7f8fa); color: var(--text-main, #1c1e21); }
+    .bug-dificultad.alta { background: #ffe0d0; color: #8a2a00; }
+    .bug-titulo { margin: 0.5rem 0 0.3rem 0; color: var(--text-main, #1c1e21); font-size: 1.05rem; }
+    .bug-pista {
+      background: #fff4e5;
+      border-left: 3px solid var(--color-info, #f59f00);
+      padding: 0.5rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #92400e;
+      margin: 0.4rem 0;
+    }
+    .bug-pasos {
+      background: #eef4ff;
+      border-left: 3px solid var(--accent, #1877f2);
+      padding: 0.6rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      margin: 0.5rem 0;
+    }
+    .bug-pasos strong { color: var(--accent, #1877f2); }
+    .bug-pasos ol { margin: 0.3rem 0 0 1.2rem; padding: 0; }
+    .bug-pasos li { margin: 0.2rem 0; }
+    .bug-pasos code { background: white; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.85rem; }
+    .bug-codigo {
+      background: #1c1e21;
+      color: #e4e6e9;
+      padding: 0.6rem 0.8rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      margin: 0.3rem 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .bug-codigo .malo { background: #5a1a1a; color: #ffd0d0; display: block; padding: 0.2rem 0.4rem; margin: 0.1rem 0; border-radius: 3px; }
+    .bug-codigo .bueno { background: #1a4a1a; color: #d0ffd0; display: block; padding: 0.2rem 0.4rem; margin: 0.1rem 0; border-radius: 3px; }
+    .bug-status { font-size: 0.9rem; margin: 0.5rem 0 0.3rem 0; color: var(--text-muted, #65676b); }
+    .bug-status.resuelto { color: var(--color-exito, #10b981); font-weight: 600; }
+    .bug-link-archivo {
+      color: var(--accent, #1877f2);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .bug-link-archivo:hover { text-decoration: underline; }
+    .detective-bugs { margin: 0.8rem 0 1.5rem 0; }
+  </style>
   <script src="/static/theme.js"></script>
 </head>
 <body data-brightness="100">
@@ -31,10 +107,14 @@
       <h2>¿Cómo funciona?</h2>
       <button class="explain-btn" data-target="intro-det">💡 Explicame esto</button>
       <div class="explicacion" id="intro-det-exp" style="display:none;">
-        Cada card es un bug. La card te muestra: dónde está, qué pista te da el "culpable",
-        cómo es el código MALO y cómo es el código BUENO. Tu trabajo: abrir el archivo en
-        tu editor, leer el código MALO, entender por qué está mal, y cambiarlo por el BUENO.
-        Cuando lo hagas, refrescá esta página y marcá la card como resuelta.
+        Cada card es un bug. Te muestra: <b>dónde está</b> (archivo y línea), <b>la pista</b> (qué buscar),
+        <b>pasos concretos</b> (qué hacer para arreglarlo), <b>código MALO</b> (cómo está) y <b>código BUENO</b> (cómo debería estar).
+        <br><br>
+        <b>Tu trabajo</b>: abrir el archivo en tu editor, seguir los pasos, cambiar el MALO por el BUENO,
+        guardar, refrescar esta página, y marcar como resuelto.
+        <br><br>
+        <b>Tip</b>: probá primero el código MALO en vivo. Por ejemplo, si dice "concatenás mal la URL",
+        andá a la página y mirala romper.
       </div>
       <p>Hay <b>10 bugs en 5 grupos</b>. Cada grupo tiene 2 bugs + variantes. Empezá por el más fácil.</p>
       <p>Tu progreso se guarda en este navegador. Si querés resetear, hacé click en "Resetear progreso".</p>
@@ -44,16 +124,26 @@
       </p>
     </section>
 
-    <!-- GRUPO 1: URLs -->
+    <!-- GRUPO 1: URLs mal construidas -->
     <h2>Grupo 1: 🔗 URLs mal construidas</h2>
-    <p class="muted">El bug más común en frontend. Aparece cuando concatenás strings en vez de armar la URL bien.</p>
+    <p class="muted">El bug más común en frontend. Aparece cuando concatenás strings en vez de armar la URL bien. <b>Probalo vos</b>: abrí <a href="/static/dbbuilder.html?db=musica" class="bug-link-archivo">/static/dbbuilder.html?db=musica</a> y mirá la URL que se genera en la sección "Consultar por URL".</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="1a">
         <span class="bug-num">1A</span>
         <span class="bug-dificultad baja">Fácil</span>
         <h3 class="bug-titulo">URL duplicada en dbbuilder.html</h3>
-        <p>En el archivo <code>src/static/dbbuilder.html</code>, líneas 215 y 230.</p>
-        <div class="bug-pista">💡 Pista: el "host" aparece dos veces en la misma URL. Mirá bien la concatenación.</div>
+        <p>En el archivo <code>src/static/dbbuilder.html</code>, función <code>actualizarURLGenerada</code>.</p>
+        <div class="bug-pista">💡 <b>Pista</b>: el "host" aparece dos veces en la misma URL. Mirá bien la concatenación.</div>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>Abrí <code>src/static/dbbuilder.html</code> en tu editor</li>
+            <li>Buscá la línea que empieza con <code>let url =</code> en la función <code>actualizarURLGenerada</code></li>
+            <li>Reemplazá el string hardcodeado <code>http://127.0.0.1:8000</code> por <code>${window.location.origin}</code></li>
+            <li>Guardá y refrescá <a href="/static/dbbuilder.html?db=musica" class="bug-link-archivo">la página</a></li>
+            <li>Volvé acá y marcá como resuelto</li>
+          </ol>
+        </div>
         <div class="bug-codigo"><span class="malo">let url = `http://127.0.0.1:8000http://127.0.0.1:8000/api/v1/dbbuilder/consultar?db=${nombre}`;</span></div>
         <div class="bug-codigo"><span class="bueno">let url = `${window.location.origin}/api/v1/dbbuilder/consultar?db=${nombre}`;</span></div>
         <p class="bug-status" data-status="1a">Estado: <span class="no-resuelto">No resuelto</span></p>
@@ -65,26 +155,45 @@
         <span class="bug-dificultad media">Medio</span>
         <h3 class="bug-titulo">URL mal concatenada con query params</h3>
         <p>En <code>dbbuilder.html</code>, función <code>actualizarURLGenerada</code>.</p>
-        <div class="bug-pista">💡 Pista: el operador <code>&amp;</code> para separar params se mete con template literals mal hechos.</div>
-        <div class="bug-codigo"><span class="malo">let url = '/api/v1/dbbuilder/consultar?db=' + nombre + &limite=&limite;
+        <div class="bug-pista">💡 <b>Pista</b>: el operador <code>+</code> se mete con template literals. Y los valores no se codifican para URL.</div>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>Mismo archivo, misma función</li>
+            <li>Buscá la línea <code>let url = '/api/v1/dbbuilder/consultar?db=' +</code></li>
+            <li>Reescribila usando template literals: <code>`...${nombre}...${limite}...`</code></li>
+            <li>Envolvé <code>campo</code> y <code>filtro</code> con <code>encodeURIComponent(...)</code> para que los espacios y acentos no rompan la URL</li>
+          </ol>
+        </div>
+        <div class="bug-codigo"><span class="malo">let url = '/api/v1/dbbuilder/consultar?db=' + nombre + '&limite=' + limite;
 if (campo) url += '&campo=' + campo;  // FALTA codificar</span></div>
         <div class="bug-codigo"><span class="bueno">let url = `/api/v1/dbbuilder/consultar?db=${nombre}&limite=${limite}`;
-if (campo) url += `&campo=${encodeURIComponent(campo)}`;  // SEGURO</span></div>
+if (campo) url += `&campo=${encodeURIComponent(campo)}`;</span></div>
         <p class="bug-status" data-status="1b">Estado: <span class="no-resuelto">No resuelto</span></p>
         <button class="btn-medio" onclick="resolverBug('1b')">✓ Marcar como resuelto</button>
       </div>
     </div>
 
-    <!-- GRUPO 2: Validación -->
+    <!-- GRUPO 2: Validación de input -->
     <h2>Grupo 2: ✅ Validación de input</h2>
-    <p class="muted">El usuario puede mandar lo que quiera. Si no validás, el server hace cualquier cosa.</p>
+    <p class="muted">El usuario puede mandar lo que quiera. Si no validás, el server hace cualquier cosa. <b>Probalo vos</b>: <a href="/static/dbbuilder.html" class="bug-link-archivo">andá a la página del dbbuilder</a> y mirá el formulario "Crear DB Custom".</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="2a">
         <span class="bug-num">2A</span>
         <span class="bug-dificultad baja">Fácil</span>
         <h3 class="bug-titulo">No validar input vacío</h3>
-        <p>En <code>app.py</code>, endpoint <code>/api/v1/dbbuilder/crear</code>.</p>
-        <div class="bug-pista">💡 Pista: si el usuario manda <code>{"nombre": ""}</code>, el server ¿qué hace?</div>
+        <p>En <code>src/app.py</code>, endpoint <code>/api/v1/dbbuilder/crear</code>.</p>
+        <div class="bug-pista">💡 <b>Pista</b>: si el usuario manda <code>{"nombre": ""}</code>, el server ¿qué hace? ¿Devuelve error o crea una DB fantasma?</p>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>Abrí <code>src/app.py</code></li>
+            <li>Buscá <code>@app.post("/api/v1/dbbuilder/crear"</code></li>
+            <li>Después de obtener <code>nombre = body.get("nombre", "mi_db")</code>, agregá: <code>nombre = nombre.strip() if nombre else ""</code></li>
+            <li>Si está vacío, devolvé <code>HTTPException(status_code=400, detail="El nombre no puede estar vacío")</code></li>
+            <li>Probá mandando <code>POST /api/v1/dbbuilder/crear</code> con <code>{"nombre": "", "campos": ["id","a","b"], "datos": []}</code></li>
+          </ol>
+        </div>
         <div class="bug-codigo"><span class="malo">nombre = body.get("nombre", "mi_db")  # acepta string vacío</span></div>
         <div class="bug-codigo"><span class="bueno">nombre = body.get("nombre", "").strip()
 if not nombre:
@@ -98,13 +207,22 @@ if not nombre:
         <span class="bug-dificultad media">Medio</span>
         <h3 class="bug-titulo">Tipo de dato incorrecto</h3>
         <p>En <code>app.py</code>, endpoint <code>/api/v1/dbbuilder/consultar</code>.</p>
-        <div class="bug-pista">💡 Pista: si el usuario manda <code>limite="muchos"</code>, el server ¿qué hace?</div>
+        <div class="bug-pista">💡 <b>Pista</b>: si el usuario manda <code>limite=uchos</code>, el server ¿qué hace? Probálo: <a href="/api/v1/dbbuilder/consultar?db=musica&limite=uchos" target="_blank" class="bug-link-archivo">abrir este link</a>.</p>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>En <code>app.py</code>, buscá <code>@app.get("/api/v1/dbbuilder/consultar"</code></li>
+            <li>Donde leés <code>limite</code>, usá <code>int(...)</code> con try/except</li>
+            <li>Si no es número, devolvé 400 con mensaje claro</li>
+            <li>Acotá el rango: <code>limite = max(1, min(1000, limite))</code></li>
+          </ol>
+        </div>
         <div class="bug-codigo"><span class="malo">limite = 100  # el server decide siempre, ignora al usuario</span></div>
         <div class="bug-codigo"><span class="bueno">try:
     limite = int(request.query_params.get("limite", 100))
-except ValueError:
+except (TypeError, ValueError):
     raise HTTPException(400, "limite debe ser número")
-limite = max(1, min(1000, limite))  # acotar</span></div>
+limite = max(1, min(1000, limite))</span></div>
         <p class="bug-status" data-status="2b">Estado: <span class="no-resuelto">No resuelto</span></p>
         <button class="btn-medio" onclick="resolverBug('2b')">✓ Marcar como resuelto</button>
       </div>
@@ -112,20 +230,26 @@ limite = max(1, min(1000, limite))  # acotar</span></div>
 
     <!-- GRUPO 3: SQL Injection -->
     <h2>Grupo 3: 💉 SQL Injection</h2>
-    <p class="muted">El clásico. Concatenar input del usuario en una query SQL es el error #1 en OWASP.</p>
+    <p class="muted">El clásico. OWASP Top 1 histórico. Si concatenás input del usuario en una query SQL, estás regalando tu DB. <b>Probalo vos</b>: <a href="/api/v1/dbbuilder/consultar?db=musica&filtro=artista=' OR '1'='1" target="_blank" class="bug-link-archivo">mirá este endpoint</a> y pensá qué pasa con el filtro.</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="3a">
         <span class="bug-num">3A</span>
         <span class="bug-dificultad alta">Alto</span>
         <h3 class="bug-titulo">Concatenar input en SELECT</h3>
         <p>En <code>app.py</code>, función <code>api_dbbuilder_consultar</code>.</p>
-        <div class="bug-pista">💡 Pista: la query se arma concatenando strings. Un input como <code>' OR 1=1 --</code> rompe todo.</div>
-        <div class="bug-codigo"><span class="malo">sql = f'SELECT * FROM "{db}" WHERE {filtro} LIMIT ?'
-# INYECCIÓN: filtro = "1' OR 1=1 --" → query rota, filtra TODOS los datos</span></div>
-        <div class="bug-codigo"><span class="bueno"># Validar filtro contra una whitelist
-if filtro and not re.match(r'^[a-zA-Z_][a-zA-Z0-9_=<>\'\s]+$', filtro):
-    raise HTTPException(400, "Filtro inválido")
-# O usar SQLAlchemy con ORM (más seguro)</span></div>
+        <div class="bug-pista">💡 <b>Pista</b>: el query se arma con f-string <code>f"...{input}..."</code> o con <code>+</code>. Cualquier input del usuario debería ir como placeholder <code>?</code>.</p>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>En <code>app.py</code>, buscá la función que arma la query del <code>SELECT</code> en el dbbuilder</li>
+            <li>Buscá el patrón <code>f"SELECT * FROM ... LIKE '%{filtro}%'"</code> o similar</li>
+            <li>Reescribila con placeholder: <code>"SELECT * FROM ... WHERE campo LIKE ?"</code> + <code>cursor.execute(query, (f"%{filtro}%",))</code></li>
+            <li>Si tu SQL es dinámico (varios campos), validá el nombre del campo contra una whitelist</li>
+          </ol>
+        </div>
+        <div class="bug-codigo"><span class="malo">sql = f"SELECT * FROM (db) WHERE (titulo) LIKE '%{filtro}%' -- // sin escape, vulnerable a 'OR 1=1 --"</span></div>
+        <div class="bug-codigo"><span class="bueno">sql = "SELECT * FROM (db) WHERE (titulo) LIKE ?"
+cursor.execute(sql, (f"%{filtro}%",))  // parametrizado, seguro</span></div>
         <p class="bug-status" data-status="3a">Estado: <span class="no-resuelto">No resuelto</span></p>
         <button class="btn-medio" onclick="resolverBug('3a')">✓ Marcar como resuelto</button>
       </div>
@@ -133,36 +257,51 @@ if filtro and not re.match(r'^[a-zA-Z_][a-zA-Z0-9_=<>\'\s]+$', filtro):
       <div class="bug-card" data-bug="3b">
         <span class="bug-num">3B</span>
         <span class="bug-dificultad alta">Alto</span>
-        <h3 class="bug-titulo">Sin prepared statements</h3>
+        <h3 class="bug-titulo">INSERT sin prepared statements</h3>
         <p>En <code>db/db.py</code>, función de insert.</p>
-        <div class="bug-pista">💡 Pista: el INSERT se hace con f-strings, no con placeholders. Cualquier input se cuela.</p>
-        <div class="bug-codigo"><span class="malo">conn.execute(f"INSERT INTO {tabla} VALUES ({values})")
-# PELIGRO: values viene del usuario sin sanitizar</span></div>
-        <div class="bug-codigo"><span class="bueno">cols = ', '.join([f'"{c}"' for c in campos])
-placeholders = ', '.join(['?' for _ in campos])
-conn.execute(f'INSERT INTO "{tabla}" ({cols}) VALUES ({placeholders})', values)
-# Placeholders, no concatenación</span></div>
+        <div class="bug-pista">💡 <b>Pista</b>: el INSERT arma los VALUES concatenando strings. Cualquier input del usuario debería ir como placeholder <code>?</code>.</p>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>En <code>db/db.py</code>, buscá <code>INSERT INTO</code></li>
+            <li>Buscá la concatenación: <code>VALUES ('{valor}')</code> o <code>VALUES ({valor})</code></li>
+            <li>Reescribila con placeholders: <code>VALUES (?, ?, ?)</code> + tupla de valores</li>
+          </ol>
+        </div>
+        <div class="bug-codigo"><span class="malo">conn.execute(f"INSERT INTO (tabla) (cols) VALUES ({vals[0]}' + str(cols[1]) + '...")</span></div>
+        <div class="bug-codigo"><span class="bueno">placeholders = ", ".join(["?"] * len(cols))
+conn.execute(f"INSERT INTO (tabla) ({cols_quoted}) VALUES ({placeholders})", tuple(vals))</span></div>
         <p class="bug-status" data-status="3b">Estado: <span class="no-resuelto">No resuelto</span></p>
         <button class="btn-medio" onclick="resolverBug('3b')">✓ Marcar como resuelto</button>
       </div>
     </div>
 
-    <!-- GRUPO 4: Auth -->
+    <!-- GRUPO 4: Autenticación -->
     <h2>Grupo 4: 🔐 Autenticación</h2>
-    <p class="muted">El usuario es anónimo hasta que demuestre lo contrario. Si dejás cosas sin auth, son públicas.</p>
+    <p class="muted">El usuario es anónimo hasta que demuestre lo contrario. Si dejás cosas sin auth, son públicas. <b>Probalo vos</b>: <a href="/api/v1/auth/admin" target="_blank" class="bug-link-archivo">abrir /api/v1/auth/admin sin estar logueado</a>.</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="4a">
         <span class="bug-num">4A</span>
         <span class="bug-dificultad media">Medio</span>
-        <h3 class="bug-titulo">Credenciales hardcodeadas</h3>
+        <h3 class="bug-titulo">Credenciales hardcoded</h3>
         <p>En <code>app.py</code>, en algún lugar de la config.</p>
-        <div class="bug-pista">💡 Pista: las credenciales están escritas en el código fuente. Cualquiera que abre el repo las ve.</div>
-        <div class="bug-codigo"><span class="malo">DB_PASSWORD = "admin123"  # MAL
-API_KEY = "sk-12345abcde"  # MAL</span></div>
+        <div class="bug-pista">💡 <b>Pista</b>: las credenciales están escritas en el código fuente. Cualquiera que abre el repo las ve. Debería abrir el repo las ve. Debería leerlas de variables de entorno sin default.</p>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>En <code>app.py</code>, buscá <code>PASSWORD</code>, <code>SECRET</code>, <code>API_KEY</code></li>
+            <li>Si ves <code>os.environ.get('DB_PASSWORD', 'admin123')</code> o similar con default hardcoded: es bug</li>
+            <li>Reemplazalo por <code>os.environ.get('DB_PASSWORD')</code> SIN default</li>
+            <li>Si la variable no está seteada, fallar con mensaje claro al iniciar</li>
+          </ol>
+        </div>
+        <div class="bug-codigo"><span class="malo">DB_PASSWORD = "admin123"  # MAL: hardcoded
+import os; API_KEY = os.environ.get("API_KEY", "sk-1234abc")  # MAL: con default</span></div>
         <div class="bug-codigo"><span class="bueno">import os
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
-API_KEY = os.environ.get("API_KEY", "")
-# Las credenciales van en variables de entorno, no en el código</span></div>
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+API_KEY = os.environ.get("API_KEY")
+if not DB_PASSWORD or not API_KEY:
+    raise RuntimeError("Faltan variables de entorno")</span></div>
         <p class="bug-status" data-status="4a">Estado: <span class="no-resuelto">No resuelto</span></p>
         <button class="btn-medio" onclick="resolverBug('4a')">✓ Marcar como resuelto</button>
       </div>
@@ -172,16 +311,18 @@ API_KEY = os.environ.get("API_KEY", "")
         <span class="bug-dificultad alta">Alto</span>
         <h3 class="bug-titulo">Token que no expira</h3>
         <p>En <code>app.py</code>, sistema de tokens (si existe).</p>
-        <div class="bug-pista">💡 Pista: el token se genera una vez y sirve para siempre. Si te lo roban, no hay forma de invalidarlo.</div>
-        <div class="bug-codigo"><span class="malo">token = generate_token(user)
-# El token vive en la DB y nunca se vence
-# Si lo roban, sirve eternamente</span></div>
-        <div class="bug-codigo"><span class="bueno">import jwt
-token = jwt.encode(
-    {"user": user, "exp": datetime.utcnow() + timedelta(hours=1)},
-    SECRET_KEY, algorithm="HS256"
-)
-# 1 hora de vida, después se regenera</span></div>
+        <div class="bug-pista">💡 <b>Pista</b>: el token se genera una vez y sirve para siempre. Si te lo roban, no hay forma de invalidarlo.</p>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>Si no hay sistema de tokens: este bug no aplica (skipealo)</li>
+            <li>Si hay: buscá la función que genera tokens (ej: <code>create_access_token</code>)</li>
+            <li>Agregá <code>expires_delta=timedelta(hours=1)</code> o lo que corresponda</li>
+            <li>En el payload, incluí <code>"exp": datetime.utcnow() + timedelta(...)</code></li>
+          </ol>
+        </div>
+        <div class="bug-codigo"><span class="malo">import jwt; token = jwt.encode({"user": user, "exp": datetime.utcnow() + timedelta(hours=1)}, SECRET_KEY)  # 1 hora de vida, después se regenera</span></div>
+        <div class="bug-codigo"><span class="bueno">import jwt; token = jwt.encode({"user": user}, SECRET_KEY)  # sin exp, válido para siempre</span></div>
         <p class="bug-status" data-status="4b">Estado: <span class="no-resuelto">No resuelto</span></p>
         <button class="btn-medio" onclick="resolverBug('4b')">✓ Marcar como resuelto</button>
       </div>
@@ -189,18 +330,25 @@ token = jwt.encode(
 
     <!-- GRUPO 5: Information Disclosure -->
     <h2>Grupo 5: 🔍 Information Disclosure</h2>
-    <p class="muted">El server cuenta demasiado. Versiones, paths internos, configs. Toda esa info le sirve al atacante.</p>
+    <p class="muted">El server cuenta demasiado. Versiones, paths internos, configs. Toda esa info se le sirve al atacante. <b>Probalo vos</b>: <a href="/api/v1/metadatos" target="_blank" class="bug-link-archivo">abrir /api/v1/metadatos</a> y mirá qué devuelve.</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="5a">
         <span class="bug-num">5A</span>
         <span class="bug-dificultad baja">Fácil</span>
         <h3 class="bug-titulo">Stack trace visible en errores</h3>
         <p>En <code>app.py</code>, default exception handler.</p>
-        <div class="bug-pista">💡 Pista: cuando algo tira error 500, el server muestra TODO el stack trace. Eso le dice al atacante dónde está el código y qué libs usás.</div>
-        <div class="bug-codigo"><span class="malo">return JSONResponse(status_code=500, content={"error": str(e), "stack": traceback.format_exc()})
-# En producción esto filtra paths internos, versiones de libs, etc.</span></div>
-        <div class="bug-codigo"><span class="bueno">return JSONResponse(status_code=500, content={"error": "Error interno del servidor"})
-# El stack trace va a los logs internos, no al cliente</span></div>
+        <div class="bug-pista">💡 <b>Pista</b>: cuando algo tira error 500, el server muestra TODO el stack trace. Eso le dice al atacante dónde está el código y qué libs usás.</p>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>En <code>app.py</code>, agregá un exception handler global</li>
+            <li>Si es 500: devolvé mensaje genérico al cliente, logueá el stack internamente</li>
+            <li>Probálo rompiendo algo: <a href="/api/v1/endpoint_que_no_existe" target="_blank" class="bug-link-archivo">/api/v1/endpoint_que_no_existe</a></li>
+          </ol>
+        </div>
+        <div class="bug-codigo"><span class="malo">return JSONResponse(status_code=500, content={"error": str(exc)})  # filtra stack trace</span></div>
+        <div class="bug-codigo"><span class="bueno">import logging; logging.exception(exc)
+return JSONResponse(status_code=500, content={"error": "Error interno del servidor"})</span></div>
         <p class="bug-status" data-status="5a">Estado: <span class="no-resuelto">No resuelto</span></p>
         <button class="btn-medio" onclick="resolverBug('5a')">✓ Marcar como resuelto</button>
       </div>
@@ -210,79 +358,72 @@ token = jwt.encode(
         <span class="bug-dificultad media">Medio</span>
         <h3 class="bug-titulo">Endpoint /debug que filtra config</h3>
         <p>En <code>app.py</code>, el endpoint <code>/api/v1/debug</code>.</p>
-        <div class="bug-pista">💡 Pista: el endpoint <code>/api/v1/debug</code> está accesible sin auth y devuelve info sensible.</div>
+        <div class="bug-pista">💡 <b>Pista</b>: el endpoint <code>/api/v1/debug</code> está accesible sin auth y devuelve variables de entorno sensibles. Solo accesible si DEV_MODE está activado.</p>
+        <div class="bug-pasos">
+          <strong>📋 Pasos para arreglarlo:</strong>
+          <ol>
+            <li>En <code>app.py</code>, buscá <code>@app.get("/api/v1/debug"</code></li>
+            <li>Verificá que esté detrás de un check de variable de entorno: <code>if not os.environ.get("DEBUG_MODE"): raise HTTPException(404)</code></li>
+            <li>En producción, esa variable NO debe estar seteada → endpoint da 404</li>
+            <li>Si querés ser más paranoico: que requiera auth + que la respuesta sea mínima (sin secretos)</li>
+          </ol>
+        </div>
         <div class="bug-codigo"><span class="malo">@app.get("/api/v1/debug")
 def debug():
-    return {"db_host": "10.20.40.50", "secret_key": "DEMO-REDACTED", "env": "production"}
-# Shadow API encontrada por el atacante</span></div>
-        <div class="bug-codigo"><span class="bueno">@app.get("/api/v1/debug")
+    return {"db_host": "10.20.40.50", "secret_key": "DEMO-REDACTED", "env": "production"}  # accesible sin auth</span></div>
+        <div class="bug-codigo"><span class="bueno">@app.get("/api/v1/debug", include_in_schema=False)
 def debug():
     if not os.environ.get("DEBUG_MODE"):
         raise HTTPException(404)
-    return {"status": "ok"}
-# Solo accesible si DEBUG_MODE está activado en el env</span></div>
+    return {"status": "ok"}  # solo si DEBUG_MODE está seteada</span></div>
         <p class="bug-status" data-status="5b">Estado: <span class="no-resuelto">No resuelto</span></p>
         <button class="btn-medio" onclick="resolverBug('5b')">✓ Marcar como resuelto</button>
       </div>
     </div>
 
-    <footer class="main-footer">
-      <p>RedTeam Lab v4 · Hecho por <b>Juan Alberti</b> (AlbertiJ) con ayuda de <b>Mavis</b></p>
-      <p class="muted">Los bugs son intencionales con fines didácticos. No los uses en sistemas reales.</p>
-    </footer>
   </main>
 
+  <footer>
+    <p>RedTeam Lab v4 · Hecho por <b>Juan Alberti</b> (AlbertiJ) con ayuda de <b>Mavis</b></p>
+    <p>Open source · Solo para aprendizaje ético · No apto para producción real</p>
+  </footer>
+
   <script>
-    // Brillo
+    // === BRILLO ===
     const btn = document.getElementById('brightBtn');
     const bar = document.getElementById('brightnessBar');
     const slider = document.getElementById('brightnessSlider');
     const close = document.getElementById('closeBright');
+    function aplicarBrillo(v) {
+      document.documentElement.style.filter = `brightness(${v}%)`;
+      localStorage.setItem('brightness', v);
+    }
     btn.onclick = () => bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
     close.onclick = () => bar.style.display = 'none';
-    slider.oninput = (e) => {
-      document.body.style.filter = `brightness(${e.target.value}%)`;
-      localStorage.setItem('brightness', e.target.value);
-    };
-    const savedBright = localStorage.getItem('brightness');
-    if (savedBright) {
-      slider.value = savedBright;
-      document.body.style.filter = `brightness(${savedBright}%)`;
-    }
+    slider.oninput = (e) => aplicarBrillo(e.target.value);
+    const saved = localStorage.getItem('brightness');
+    if (saved) { slider.value = saved; aplicarBrillo(saved); }
 
-    // Explicame esto
-    document.querySelectorAll('.explain-btn').forEach(btn => {
-      btn.onclick = () => {
-        const target = btn.dataset.target;
-        const exp = document.getElementById(target + '-exp');
-        if (exp) {
-          exp.style.display = exp.style.display === 'none' ? 'block' : 'none';
-        }
+    // === EXPLICACIONES (botones Explicame esto) ===
+    document.querySelectorAll('.explain-btn').forEach(b => {
+      b.onclick = () => {
+        const exp = document.getElementById(b.dataset.target + '-exp');
+        if (exp) exp.style.display = exp.style.display === 'none' ? 'block' : 'none';
       };
     });
 
-    // Progreso
+    // === PROGRESO (localStorage) ===
     function cargarProgreso() {
-      const saved = JSON.parse(localStorage.getItem('redteam_v4_bugs') || '{}');
-      document.querySelectorAll('.bug-card').forEach(card => {
-        const bug = card.dataset.bug;
-        const status = card.querySelector(`[data-status="${bug}"]`);
-        if (saved[bug]) {
-          card.classList.add('resuelto');
-          status.innerHTML = 'Estado: <span class="resuelto">✓ Resuelto</span>';
-        }
-      });
+      const resueltos = JSON.parse(localStorage.getItem('detective-resueltos') || '[]');
+      resueltos.forEach(id => marcarResuelto(id, false));
       actualizarContador();
     }
 
     function guardarProgreso() {
-      const saved = {};
-      document.querySelectorAll('.bug-card').forEach(card => {
-        if (card.classList.contains('resuelto')) {
-          saved[card.dataset.bug] = true;
-        }
-      });
-      localStorage.setItem('redteam_v4_bugs', JSON.stringify(saved));
+      const cards = document.querySelectorAll('.bug-card.resuelto');
+      const ids = Array.from(cards).map(c => c.dataset.bug);
+      localStorage.setItem('detective-resueltos', JSON.stringify(ids));
+      actualizarContador();
     }
 
     function actualizarContador() {
@@ -291,27 +432,54 @@ def debug():
       document.getElementById('progreso').textContent = `${resueltos}/${total} resueltos`;
     }
 
-    window.resolverBug = function(bug) {
-      const card = document.querySelector(`[data-bug="${bug}"]`);
+    function marcarResuelto(id, persistir = true) {
+      const card = document.querySelector(`.bug-card[data-bug="${id}"]`);
+      if (!card) return;
       card.classList.add('resuelto');
-      const status = card.querySelector(`[data-status="${bug}"]`);
-      status.innerHTML = 'Estado: <span class="resuelto">✓ Resuelto</span>';
+      const status = card.querySelector('.bug-status');
+      if (status) {
+        status.classList.add('resuelto');
+        status.innerHTML = 'Estado: <span class="resuelto">✅ Resuelto</span>';
+      }
+      const btn = card.querySelector('button.btn-medio');
+      if (btn) {
+        btn.textContent = '↩ Desmarcar';
+        btn.onclick = () => desmarcar(id);
+      }
+      if (persistir) guardarProgreso();
+    }
+
+    function desmarcar(id) {
+      const card = document.querySelector(`.bug-card[data-bug="${id}"]`);
+      if (!card) return;
+      card.classList.remove('resuelto');
+      const status = card.querySelector('.bug-status');
+      if (status) {
+        status.classList.remove('resuelto');
+        status.innerHTML = 'Estado: <span class="no-resuelto">No resuelto</span>';
+      }
+      const btn = card.querySelector('button.btn-medio');
+      if (btn) {
+        btn.textContent = '✓ Marcar como resuelto';
+        btn.onclick = () => resolverBug(id);
+      }
       guardarProgreso();
-      actualizarContador();
-    };
+    }
+
+    function resolverBug(id) {
+      marcarResuelto(id, true);
+    }
 
     document.getElementById('btnReset').onclick = () => {
-      if (confirm('¿Borrar tu progreso en el Detective de Bugs?')) {
-        localStorage.removeItem('redteam_v4_bugs');
-        document.querySelectorAll('.bug-card').forEach(card => {
-          card.classList.remove('resuelto');
-          const bug = card.dataset.bug;
-          card.querySelector(`[data-status="${bug}"]`).innerHTML = 'Estado: <span class="no-resuelto">No resuelto</span>';
+      if (confirm('¿Seguro que querés resetear todo el progreso?')) {
+        localStorage.removeItem('detective-resueltos');
+        document.querySelectorAll('.bug-card.resuelto').forEach(c => {
+          desmarcar(c.dataset.bug);
         });
-        actualizarContador();
       }
     };
 
+    // Init
     cargarProgreso();
   </script>
 </body>

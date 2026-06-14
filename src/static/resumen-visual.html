@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>RedTeam Lab v4 — Mapa del Lab</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f2f5;
+    color: #1c1e21;
+    padding: 40px;
+    min-height: 100vh;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  h1 {
+    font-size: 2.4rem;
+    color: #1877f2;
+    margin-bottom: 8px;
+  }
+  .subtitulo { color: #65676b; font-size: 1.1rem; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  .card {
+    background: #ffffff;
+    border: 1px solid #dadde1;
+    border-radius: 10px;
+    padding: 24px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  .card-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .card-titulo {
+    color: #1877f2;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .card-num {
+    display: inline-block;
+    background: #1877f2;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .card-desc {
+    color: #65676b;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .card-items {
+    list-style: none;
+    padding: 0;
+  }
+  .card-items li {
+    color: #1c1e21;
+    font-size: 0.88rem;
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .card-items li:last-child { border-bottom: none; }
+  .footer-stats {
+    background: #ffffff;
+    border: 1px solid #dadde1;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    color: #65676b;
+    font-size: 0.95rem;
+  }
+  .stat {
+    display: inline-block;
+    margin: 0 16px;
+    color: #1877f2;
+    font-weight: 700;
+  }
+  .flechita {
+    display: inline-block;
+    color: #1877f2;
+    font-weight: 700;
+    margin: 0 6px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🛰️ RedTeam Lab v4</h1>
+    <p class="subtitulo">Mapa del Lab · Pentesting ético · Didáctico · Nivel cero</p>
+  </header>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-icon">🏠</div>
+      <div class="card-titulo">Inicio</div>
+      <div class="card-num">1 entrada</div>
+      <p class="card-desc">3 opciones para empezar. Diseñado Mock D (claro, dashboard, atenuador sobre html).</p>
+      <ul class="card-items">
+        <li>📦 DBs precargadas (7 DBs listas)</li>
+        <li>📋 Cargar tu propia DB (wizard 1 paso)</li>
+        <li>🪲 Detective de Bugs (10 bugs)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">🎵</div>
+      <div class="card-titulo">Práctica</div>
+      <div class="card-num">7 DBs precargadas</div>
+      <p class="card-desc">Bases de datos listas para explorar y consultar por URL. Filtros y proyecciones.</p>
+      <ul class="card-items">
+        <li>🎵 Música <span class="flechita">→</span> 8 registros</li>
+        <li>🎬 Películas <span class="flechita">→</span> 7 registros</li>
+        <li>🌍 Países <span class="flechita">→</span> 7 registros</li>
+        <li>📚 Libros <span class="flechita">→</span> 5 registros</li>
+        <li>⚽ Deportes <span class="flechita">→</span> 5 registros</li>
+        <li>🍽️ Comidas <span class="flechita">→</span> 6 registros</li>
+        <li>💻 Lenguajes <span class="flechita">→</span> 5 registros</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">🗄️</div>
+      <div class="card-titulo">DB Builder</div>
+      <div class="card-num">7 + 3 custom</div>
+      <p class="card-desc">Constructor visual con visor y consulta por URL. Soporta filtro ?db=musica.</p>
+      <ul class="card-items">
+        <li>👁️ Mostrar / ocultar contenido</li>
+        <li>🔗 Consultar por URL con filtros</li>
+        <li>🛠️ 3 slots para crear DBs custom</li>
+        <li>📊 Placeholders contextuales</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">🪲</div>
+      <div class="card-titulo">Detective de Bugs</div>
+      <div class="card-num">10 bugs / 5 grupos</div>
+      <p class="card-desc">Cada bug tiene pista, pasos accionables, código malo vs bueno. Progreso persistente.</p>
+      <ul class="card-items">
+        <li>🔗 URLs mal construidas (2)</li>
+        <li>✅ Validación de input (2)</li>
+        <li>💉 SQL Injection (2)</li>
+        <li>🔐 Autenticación (2)</li>
+        <li>🔍 Information Disclosure (2)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">🧪</div>
+      <div class="card-titulo">Tests Automáticos</div>
+      <div class="card-num">24 tests</div>
+      <p class="card-desc">Suite pytest + pytest-bdd con features en español. Detecta bugs en el código.</p>
+      <ul class="card-items">
+        <li>📝 10 features Gherkin (.feature)</li>
+        <li>⚡ 14 tests de humo + API</li>
+        <li>🔄 CI-ready: <code>pytest tests/</code></li>
+        <li>📊 22 passed, 2 skipped (vacunados)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">📓</div>
+      <div class="card-titulo">Historial + Extras</div>
+      <div class="card-num">+ 4 páginas</div>
+      <p class="card-desc">Bitácora del proyecto, dashboard, API visual, errores. Todo en español.</p>
+      <ul class="card-items">
+        <li>📓 Historial técnico (8 entradas)</li>
+        <li>📊 Dashboard de hallazgos</li>
+        <li>🔌 API Visual (playground)</li>
+        <li>⚠️ Documentación de errores</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="footer-stats">
+    <span class="stat">5 servidores</span> ·
+    <span class="stat">24 endpoints</span> ·
+    <span class="stat">10 páginas</span> ·
+    <span class="stat">5 colores</span> ·
+    <span class="stat">4 fuentes</span> ·
+    <span class="stat">brillo ajustable</span> ·
+    <span class="stat">100% offline</span>
+  </div>
+
+</div>
+</body>
+</html>

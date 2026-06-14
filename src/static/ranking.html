@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranking — RedTeam Lab v4</title>
+  <link rel="stylesheet" href="/static/style-colors.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .ranking-tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .ranking-tabla th {
+      background: var(--accent, #1877f2);
+      color: white;
+      padding: 0.7rem 1rem;
+      text-align: left;
+      font-weight: 700;
+    }
+    .ranking-tabla td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border-soft, #e0e6ed);
+    }
+    .ranking-tabla tr:nth-child(odd) td {
+      background: var(--bg-soft, #f7f8fa);
+    }
+    .ranking-tabla tr.oro td:first-child { color: #b45309; font-weight: 700; }
+    .ranking-tabla tr.plata td:first-child { color: #6b7280; font-weight: 700; }
+    .ranking-tabla tr.bronce td:first-child { color: #92400e; font-weight: 700; }
+    .ranking-tabla .pos { font-size: 1.3rem; }
+    .ranking-vacio { color: var(--text-muted, #6b7785); padding: 2rem; text-align: center; font-style: italic; }
+  </style>
+  <script src="/static/theme.js"></script>
+  <script src="/static/tour.js"></script>
+  <script src="/static/sidebar.js"></script>
+  <script src="/static/auth.js"></script>
+</head>
+<body>
+  <header>
+    <h1>🏆 Ranking</h1>
+    <p class="sub">Usuarios del RedTeam Lab, ordenados por score</p>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/static/practicas.html">Práctica</a>
+      <a href="/static/detective.html">Detective</a>
+      <a href="/static/dbbuilder.html">DB Builder</a>
+      <a href="/static/wizard.html">Cargar DB</a>
+      <a href="/static/ranking.html" class="active">Ranking</a>
+      <a href="/static/historial.html">Historial</a>
+      <button class="bright-btn" id="brightBtn">🌗 Brillo</button>
+    </nav>
+  </header>
+
+  <main class="home">
+    <section class="intro">
+      <h2>🏆 Ranking de usuarios</h2>
+      <p>Ordenados por <b>score combinado</b>: tiempo en plataforma + bugs resueltos + DBs custom creadas. Si hay menos de 10 usuarios, no aparece nadie en el ranking (es un detalle cuando recién arrancás).</p>
+      <p>Score: <code>1 minuto en plataforma = 1 punto · 1 bug resuelto = 1 punto · 1 DB custom = 2 puntos</code>.</p>
+    </section>
+
+    <section class="bloque">
+      <h3>Top usuarios</h3>
+      <div id="rankingContenedor">
+        <p class="ranking-vacio">Cargando ranking...</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>RedTeam Lab v4 · Hecho por <b>Juan Alberti</b> (AlbertiJ) con ayuda de <b>Mavis</b></p>
+    <p>Open source · Solo para aprendizaje ético · No apto para producción real</p>
+  </footer>
+
+  <script>
+    // === BRILLO ===
+    const btn = document.getElementById('brightBtn');
+    const slider = document.getElementById('brightnessSlider');
+    const bar = document.getElementById('brightnessBar');
+    const closeBtn = document.getElementById('closeBright');
+    function aplicarBrillo(v) {
+      document.documentElement.style.filter = `brightness(${v}%)`;
+      localStorage.setItem('brightness', v);
+    }
+    if (btn) btn.onclick = () => bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+    if (closeBtn) closeBtn.onclick = () => bar.style.display = 'none';
+    if (slider) slider.oninput = (e) => aplicarBrillo(e.target.value);
+    const savedBright = localStorage.getItem('brightness');
+    if (savedBright && slider) { slider.value = savedBright; aplicarBrillo(savedBright); }
+
+    // === RANKING ===
+    async function cargarRanking() {
+      const cont = document.getElementById('rankingContenedor');
+      try {
+        const r = await fetch('/api/v1/auth/ranking');
+        const data = await r.json();
+        if (!data.usuarios || data.usuarios.length === 0) {
+          cont.innerHTML = '<p class="ranking-vacio">😐 No hay usuarios todavía. Sé el primero: <a href="/static/practicas.html">andá a Práctica</a> y empezá.</p>';
+          return;
+        }
+        if (data.total_usuarios < 10) {
+          cont.innerHTML = `<p class="ranking-vacio">😐 Hay ${data.total_usuarios} usuario(s) registrados. El ranking se muestra cuando hay al menos 10. <br> (por ahora sos de los pocos que laburaron acá — eso ya es mérito.)</p>`;
+          return;
+        }
+        const cls = (i) => i === 0 ? 'oro' : i === 1 ? 'plata' : i === 2 ? 'bronce' : '';
+        const html = `
+          <table class="ranking-tabla">
+            <thead>
+              <tr><th>#</th><th>Usuario</th><th>Tiempo</th><th>Bugs</th><th>DBs</th><th>Score</th></tr>
+            </thead>
+            <tbody>
+              ${data.usuarios.map((u, i) => `
+                <tr class="${cls(i)}">
+                  <td class="pos">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i+1)}</td>
+                  <td>👤 <b>${u.nombre}</b></td>
+                  <td>${u.tiempo_total_segundos < 60 ? u.tiempo_total_segundos + 's' : Math.floor(u.tiempo_total_segundos/60) + 'min'}</td>
+                  <td>${u.bugs_resueltos_count}/10</td>
+                  <td>${u.dbs_custom_count}/3</td>
+                  <td><b>${u.score}</b> pts</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+        cont.innerHTML = html;
+      } catch (e) {
+        cont.innerHTML = '<p class="ranking-vacio">Error cargando ranking: ' + e.message + '</p>';
+      }
+    }
+    cargarRanking();
+  </script>
+</body>
+</html>

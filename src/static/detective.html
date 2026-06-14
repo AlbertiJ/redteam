@@ -85,6 +85,7 @@
   <script src="/static/theme.js"></script>
   <script src="/static/tour.js"></script>
   <script src="/static/sidebar.js"></script>
+  <script src="/static/auth.js"></script>
 </head>
 <body data-brightness="100">
   <div class="brightness-bar" id="brightnessBar" style="display:none;">
@@ -470,6 +471,14 @@ def debug():
 
     function resolverBug(id) {
       marcarResuelto(id, true);
+      // Sincronizar con el server (si hay usuario logueado)
+      if (window.RedTeamAuth && window.RedTeamAuth.usuario) {
+        fetch('/api/v1/auth/bug-resuelto', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({nombre: window.RedTeamAuth.usuario, bug_id: id})
+        }).catch(e => console.warn('No se pudo sincronizar bug con server:', e));
+      }
     }
 
     document.getElementById('btnReset').onclick = () => {

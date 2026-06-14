@@ -1,244 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>RedTeam — Menú de Práctica</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
-  header { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-  h1 { color: #58a6ff; margin-bottom: 6px; }
-  .back { color: #58a6ff; text-decoration: none; font-size: 13px; }
-  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-  .panel h2 { color: #58a6ff; margin-bottom: 12px; font-size: 18px; }
-  .toggle-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-  .toggle { display: flex; align-items: center; gap: 10px; padding: 10px; background: #0d1117; border-radius: 6px; cursor: pointer; }
-  .toggle input { width: 18px; height: 18px; cursor: pointer; }
-  .toggle label { cursor: pointer; user-select: none; }
-  .nivel-group { display: flex; gap: 8px; flex-wrap: wrap; }
-  .nivel { padding: 8px 16px; background: #21262d; border: 1px solid #30363d; border-radius: 6px; cursor: pointer; }
-  .nivel.active { background: #1f6feb; border-color: #1f6feb; }
-  .url-display { background: #0d1117; padding: 12px; border-radius: 6px; font-family: monospace; color: #79c0ff; word-break: break-all; margin-top: 12px; }
-  .escenario { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 16px; margin-bottom: 12px; }
-  .escenario h3 { color: #d2a8ff; margin-bottom: 6px; }
-  .escenario .cat { color: #8b949e; font-size: 12px; margin-bottom: 8px; }
-  .escenario .vector { color: #d29922; font-family: monospace; font-size: 13px; margin-bottom: 8px; }
-  .reveal-btn { background: #238636; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 8px; }
-  .reveal-btn:hover { background: #2ea043; }
-  .reveal-content { display: none; margin-top: 12px; padding: 12px; background: #161b22; border-radius: 4px; border-left: 3px solid #d2a8ff; }
-  .reveal-content h4 { color: #d2a8ff; margin-bottom: 6px; font-size: 13px; text-transform: uppercase; }
-  .reveal-content ol, .reveal-content ul { margin-left: 20px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
-  .reveal-content pre { background: #0d1117; padding: 8px; border-radius: 4px; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-bottom: 8px; }
-  .logs { color: #8b949e; font-size: 12px; }
-  .probar-btn { background: #8957e5; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 8px; }
-  .test-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  textarea { width: 100%; min-height: 100px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 10px; border-radius: 4px; font-family: monospace; }
-  .response { background: #0d1117; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 12px; max-height: 400px; overflow: auto; }
-  button { font-family: inherit; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Práctica — RedTeam Lab v4</title>
+  <link rel="stylesheet" href="/static/style-colors.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme.js"></script>
 </head>
 <body>
-<a href="/" class="back">← Volver al índice</a>
-<header>
-  <h1>🎯 Menú de Práctica</h1>
-  <p style="color: #8b949e;">Activá vectores, ajustá dificultad, lanzá escenarios. Todo visual.</p>
-</header>
-
-<!-- NIVEL DE DIFICULTAD -->
-<div class="panel">
-  <h2>📊 Nivel de dificultad</h2>
-  <div class="nivel-group" id="niveles">
-    <div class="nivel" data-nivel="1">Nivel 1 — Básico (solo lectura)</div>
-    <div class="nivel" data-nivel="2">Nivel 2 — Intermedio (+SQLi)</div>
-    <div class="nivel" data-nivel="3">Nivel 3 — Avanzado (todos los vectores)</div>
-    <div class="nivel" data-nivel="0">Custom</div>
+  <div class="brightness-bar" id="brightnessBar" style="display:none;">
+    <label>Brillo: <input type="range" id="brightnessSlider" min="30" max="100" value="100"></label>
+    <button class="close-bright" id="closeBright">×</button>
   </div>
-  <p style="color: #8b949e; font-size: 12px; margin-top: 8px;">El nivel define qué módulos se activan por defecto. Después podés ajustar manualmente.</p>
-</div>
 
-<!-- MÓDULOS / VECTORES -->
-<div class="panel">
-  <h2>⚙️ Vectores de ataque activos</h2>
-  <div class="toggle-group">
-    <div class="toggle">
-      <input type="checkbox" id="mod-sqli" checked>
-      <label for="mod-sqli">SQL Injection (SQLi)</label>
-    </div>
-    <div class="toggle">
-      <input type="checkbox" id="mod-xxe">
-      <label for="mod-xxe">XML External Entity (XXE)</label>
-    </div>
-    <div class="toggle">
-      <input type="checkbox" id="mod-ssrf">
-      <label for="mod-ssrf">Server-Side Request Forgery (SSRF)</label>
-    </div>
-    <div class="toggle">
-      <input type="checkbox" id="mod-cmdi">
-      <label for="mod-cmdi">Command Injection (CMDi)</label>
-    </div>
-    <div class="toggle">
-      <input type="checkbox" id="mod-shadows" checked>
-      <label for="mod-shadows">Mostrar Shadow APIs</label>
-    </div>
-    <div class="toggle">
-      <input type="checkbox" id="mod-metadatos" checked>
-      <label for="mod-metadatos">Information Disclosure</label>
-    </div>
-  </div>
-  <p style="color: #8b949e; font-size: 12px; margin-top: 8px;">Esto modifica la URL automáticamente. La API detecta los flags y solo se 'vulnera' con los módulos activos.</p>
-</div>
+  <header>
+    <h1>🛰️ RedTeam Lab v4</h1>
+    <p class="sub">DBs precargadas para practicar</p>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/static/wizard.html">Cargar DB</a>
+      <a href="/static/dbbuilder.html">DB Builder</a>
+      <a href="/static/detective.html">Detective</a>
+      <a href="/static/practicas.html" class="active">Práctica</a>
+      <button class="bright-btn" id="brightBtn">🌗 Brillo</button>
+    </nav>
+  </header>
 
-<!-- URL ACTIVA -->
-<div class="panel">
-  <h2>🔗 URL activa del endpoint de auditoría</h2>
-  <div class="url-display" id="urlDisplay">http://127.0.0.1:8000http://127.0.0.1:8000/api/v1/auditoria/infraestructura</div>
-  <p style="color: #8b949e; font-size: 12px; margin-top: 8px;">Pegá esta URL en el API Visual o en el área de pruebas de abajo.</p>
-</div>
+  <main class="home">
+    <section class="intro">
+      <h2>📦 DBs precargadas</h2>
+      <p>7 bases de datos listas. Hacé clic en una para explorarla y consultarla por URL.</p>
+    </section>
 
-<!-- ESCENARIOS RESUELTOS -->
-<div class="panel">
-  <h2>📚 Escenarios resueltos (lógica paso a paso)</h2>
-  <p style="color: #8b949e; font-size: 13px; margin-bottom: 12px;">Cada escenario tiene la lógica de resolución oculta. Hacé clic en "Revelar" para ver el paso a paso. <strong>La idea no es memorizar la respuesta, sino entender la lógica para detectarla en la vida real.</strong></p>
-  <div id="escenarios"></div>
-</div>
+    <section class="bloque-grid">
+      <a href="/static/dbbuilder.html?db=musica" class="bloque bloque-link">
+        <h3>🎵 Música</h3>
+        <p>8 registros · nombre, artista, anio, genero, duracion_seg</p>
+        <span class="btn-medio">Explorar →</span>
+      </a>
+      <a href="/static/dbbuilder.html?db=peliculas" class="bloque bloque-link">
+        <h3>🎬 Películas</h3>
+        <p>7 registros · titulo, director, anio, genero, duracion_min, rating</p>
+        <span class="btn-medio">Explorar →</span>
+      </a>
+      <a href="/static/dbbuilder.html?db=paises" class="bloque bloque-link">
+        <h3>🌍 Países</h3>
+        <p>7 registros · nombre, capital, poblacion, continente, idioma_oficial, codigo_tel</p>
+        <span class="btn-medio">Explorar →</span>
+      </a>
+      <a href="/static/dbbuilder.html?db=libros" class="bloque bloque-link">
+        <h3>📚 Libros</h3>
+        <p>5 registros · titulo, autor, anio, genero, paginas, isbn</p>
+        <span class="btn-medio">Explorar →</span>
+      </a>
+      <a href="/static/dbbuilder.html?db=deportes" class="bloque bloque-link">
+        <h3>⚽ Deportes</h3>
+        <p>5 registros · nombre, jugadores, origen, tipo, primer_anio</p>
+        <span class="btn-medio">Explorar →</span>
+      </a>
+      <a href="/static/dbbuilder.html?db=comidas" class="bloque bloque-link">
+        <h3>🍽️ Comidas</h3>
+        <p>6 registros · nombre, pais_origen, ingredientes_principales, tipo, picante</p>
+        <span class="btn-medio">Explorar →</span>
+      </a>
+      <a href="/static/dbbuilder.html?db=lenguajes" class="bloque bloque-link">
+        <h3>💻 Lenguajes</h3>
+        <p>5 registros · nombre, creador, anio_creacion, paradigma, tipado, uso_principal</p>
+        <span class="btn-medio">Explorar →</span>
+      </a>
+    </section>
+  </main>
 
-<!-- ÁREA DE PRUEBAS -->
-<div class="panel">
-  <h2>🧪 Área de pruebas directa</h2>
-  <p style="color: #8b949e; font-size: 13px;">Pegá un payload, elegí el método, y mirá la respuesta. Todo en el browser, sin consola.</p>
-  <div class="test-area">
-    <div>
-      <label style="color: #8b949e; font-size: 12px;">Endpoint + query</label>
-      <input id="testPath" value="http://127.0.0.1:8000/api/v1/auditoria/infraestructura?sqli=on&xxe=on&ssrf=on&cmdi=on" style="width:100%; background:#0d1117; border:1px solid #30363d; color:#c9d1d9; padding:8px; border-radius:4px; font-family:monospace; margin-bottom:8px;">
-      <label style="color: #8b949e; font-size: 12px;">Payload (JSON para POST)</label>
-      <textarea id="testPayload">{"comando": "' OR 1=1 --"}</textarea>
-      <div style="margin-top: 8px;">
-        <button class="probar-btn" onclick="probar('GET')">GET</button>
-        <button class="probar-btn" onclick="probar('POST')">POST</button>
-      </div>
-    </div>
-    <div>
-      <label style="color: #8b949e; font-size: 12px;">Respuesta</label>
-      <div class="response" id="responseArea">// Acá va a aparecer la respuesta...</div>
-    </div>
-  </div>
-</div>
+  <footer>
+    <p>RedTeam Lab v4 · Hecho por <b>Juan Alberti</b> (AlbertiJ) con ayuda de <b>Mavis</b></p>
+  </footer>
 
-<script>
-const SID = sessionStorage.getItem('sid') || (sessionStorage.setItem('sid', Math.random().toString(36).slice(2)), sessionStorage.getItem('sid'));
-
-async function track(tipo, target, contexto='') {
-  await fetch('http://127.0.0.1:8000/api/v1/track', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({tipo, target, contexto, session_id: SID})
-  });
-}
-
-// Niveles
-document.querySelectorAll('.nivel').forEach(n => {
-  n.onclick = () => {
-    document.querySelectorAll('.nivel').forEach(x => x.classList.remove('active'));
-    n.classList.add('active');
-    const nivel = parseInt(n.dataset.nivel);
-    if (nivel === 1) {
-      document.getElementById('mod-sqli').checked = true;
-      document.getElementById('mod-xxe').checked = false;
-      document.getElementById('mod-ssrf').checked = false;
-      document.getElementById('mod-cmdi').checked = false;
-    } else if (nivel === 2) {
-      document.getElementById('mod-sqli').checked = true;
-      document.getElementById('mod-xxe').checked = true;
-      document.getElementById('mod-ssrf').checked = false;
-      document.getElementById('mod-cmdi').checked = false;
-    } else if (nivel === 3) {
-      ['sqli','xxe','ssrf','cmdi'].forEach(m => document.getElementById('mod-'+m).checked = true);
+  <script>
+    const btn = document.getElementById('brightBtn');
+    const bar = document.getElementById('brightnessBar');
+    const slider = document.getElementById('brightnessSlider');
+    const close = document.getElementById('closeBright');
+    function aplicarBrillo(v) {
+      document.documentElement.style.filter = `brightness(${v}%)`;
+      localStorage.setItem('brightness', v);
     }
-    actualizarURL();
-    track('nivel', 'practica', `nivel=${nivel}`);
-  };
-});
-
-// Actualizar URL cuando cambian los toggles
-['sqli','xxe','ssrf','cmdi'].forEach(m => {
-  document.getElementById('mod-'+m).onchange = actualizarURL;
-});
-
-function actualizarURL() {
-  const flags = ['sqli','xxe','ssrf','cmdi'].filter(m => document.getElementById('mod-'+m).checked);
-  const query = flags.map(f => `${f}=on`).join('&');
-  const url = `http://127.0.0.1:8000http://127.0.0.1:8000/api/v1/auditoria/infraestructura${query ? '?' + query : ''}`;
-  document.getElementById('urlDisplay').textContent = url;
-  document.getElementById('testPath').value = `http://127.0.0.1:8000/api/v1/auditoria/infraestructura${query ? '?' + query : ''}`;
-}
-
-// Cargar escenarios
-async function cargarEscenarios() {
-  const r = await fetch('http://127.0.0.1:8000/api/v1/escenarios');
-  const data = await r.json();
-  const cont = document.getElementById('escenarios');
-  cont.innerHTML = data.map(e => `
-    <div class="escenario">
-      <h3>#${e.id} — ${e.titulo}</h3>
-      <div class="cat">📁 ${e.categoria}</div>
-      <div class="vector">⚡ ${e.vector}</div>
-      <button class="reveal-btn" onclick="revelar(${e.id}, this)">🔍 Revelar paso a paso</button>
-      <div class="reveal-content" id="esc-${e.id}"></div>
-    </div>
-  `).join('');
-}
-
-async function revelar(id, btn) {
-  const cont = document.getElementById('esc-'+id);
-  if (cont.style.display === 'block') {
-    cont.style.display = 'none';
-    btn.textContent = '🔍 Revelar paso a paso';
-    return;
-  }
-  const r = await fetch('http://127.0.0.1:8000/api/v1/escenarios/'+id);
-  const e = await r.json();
-  cont.innerHTML = `
-    <h4>📋 Descripción</h4>
-    <p>${e.descripcion}</p>
-    <h4>📜 Logs originales</h4>
-    <pre>${e.logs_originales.join('\\n')}</pre>
-    <h4>🔍 Paso a paso (cómo detectarlo)</h4>
-    <ol>${e.paso_a_paso.map(p => `<li>${p}</li>`).join('')}</ol>
-    <h4>🛡️ Mitigación (cómo evitarlo)</h4>
-    <ul>${e.mitigacion.map(m => `<li>${m}</li>`).join('')}</ul>
-  `;
-  cont.style.display = 'block';
-  btn.textContent = '🙈 Ocultar';
-  track('escenario', `escenario_${id}`, 'revelado');
-}
-
-// Área de pruebas
-async function probar(metodo) {
-  const path = document.getElementById('testPath').value;
-  const payload = document.getElementById('testPayload').value;
-  const url = 'http://127.0.0.1:8000' + path;
-  track('click', 'probar_' + metodo, path);
-  const opts = {method: metodo, headers: {}};
-  if (metodo === 'POST') {
-    opts.headers['Content-Type'] = 'application/json';
-    opts.body = payload;
-  }
-  try {
-    const r = await fetch(url, opts);
-    const text = await r.text();
-    let pretty = text;
-    try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch {}
-    document.getElementById('responseArea').innerHTML =
-      `<span style="color:#79c0ff">${r.status} ${r.statusText}</span>\\n\\n${pretty}`;
-    track('busqueda', 'probar', `status=${r.status}`);
-  } catch (e) {
-    document.getElementById('responseArea').textContent = 'Error: ' + e.message;
-  }
-}
-
-cargarEscenarios();
-actualizarURL();
-track('navegacion', 'practicas', 'carga');
-</script>
+    btn.onclick = () => bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+    close.onclick = () => bar.style.display = 'none';
+    slider.oninput = (e) => aplicarBrillo(e.target.value);
+    const saved = localStorage.getItem('brightness');
+    if (saved) { slider.value = saved; aplicarBrillo(saved); }
+  </script>
 </body>
 </html>

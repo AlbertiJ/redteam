@@ -1,0 +1,147 @@
+/* RedTeam Lab v4.1 — Paleta + Temas dinámicos
+   Modificá SOLO los valores dentro de ":root { ... }" y los [data-tema="..."]
+   No toques nada más de este archivo. */
+
+/* === TEMA POR DEFECTO (azul Mock D) === */
+:root {
+  /* === FONDOS === */
+  --bg-body: #f0f2f5;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-soft: #f7f8fa;
+  --bg-code: #1c1e21;
+  --bg-footer: #ffffff;
+
+  /* === TEXTOS === */
+  --text-main: #1c1e21;
+  --text-muted: #65676b;
+  --text-on-accent: #ffffff;
+  --text-code: #e4e6e9;
+
+  /* === BORDES === */
+  --border-soft: #dadde1;
+  --border-accent: #f59f00;
+  --border-success: #10b981;
+
+  /* === ACENTO PRINCIPAL === */
+  --accent: #1877f2;
+  --accent-hover: #166fe5;
+  --accent-soft: #e7f3ff;
+
+  /* === COLORES SEMÁNTICOS === */
+  --color-exito: #10b981;
+  --color-fallo: #f87171;
+  --color-info: #f59f00;
+  --color-extra: #4ade80;
+
+  /* === TEMA ACTIVO (lo cambia el theme.js) === */
+  --font-base: 16px;
+  --font-family-base: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* === TEMA VERDE === */
+[data-tema="verde"] {
+  --accent: #16a34a;
+  --accent-hover: #15803d;
+  --accent-soft: #dcfce7;
+  --border-accent: #facc15;
+}
+
+/* === TEMA ROJO === */
+[data-tema="rojo"] {
+  --accent: #dc2626;
+  --accent-hover: #b91c1c;
+  --accent-soft: #fee2e2;
+  --border-accent: #f59e0b;
+}
+
+/* === TEMA VIOLETA === */
+[data-tema="violeta"] {
+  --accent: #9333ea;
+  --accent-hover: #7e22ce;
+  --accent-soft: #f3e8ff;
+  --border-accent: #f59e0b;
+}
+
+/* === TEMA NARANJA === */
+[data-tema="naranja"] {
+  --accent: #ea580c;
+  --accent-hover: #c2410c;
+  --accent-soft: #ffedd5;
+  --border-accent: #16a34a;
+}
+
+/* === TAMAÑO DE FUENTE === */
+[data-fontsize="chico"]   { --font-base: 14px; }
+[data-fontsize="normal"]  { --font-base: 16px; }
+[data-fontsize="grande"]  { --font-base: 18px; }
+[data-fontsize="xl"]      { --font-base: 21px; }
+
+/* === TIPOGRAFÍA === */
+[data-font="system"] { --font-family-base: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+[data-font="mono"]   { --font-family-base: 'JetBrains Mono', 'Fira Code', Consolas, monospace; }
+[data-font="serif"]  { --font-family-base: Georgia, 'Times New Roman', serif; }
+[data-font="rounded"]{ --font-family-base: 'Nunito', 'Comfortaa', 'Segoe UI', sans-serif; }
+
+/* === DEBAJO DE ESTO NO TOQUES NADA === */
+/* (Estas son las reglas que usan las variables. No las edites.) */
+
+body {
+  background: var(--bg-body);
+  color: var(--text-main);
+}
+
+.intro, .bloque, .mision-box, .submisiones-box, .tips-box,
+.lecciones-box, .consola-box, .quick-cmds, .col-der,
+.dbbuilder-sidebar, .dbbuilder-main {
+  background: var(--bg-card);
+  border-color: var(--border-soft);
+}
+
+header, footer { background: var(--bg-footer); border-color: var(--border-soft); }
+header h1, .intro h2, .bloque h3, .mision-box h2 { color: var(--text-main); }
+.intro p, .bloque p, .mision-cuerpo { color: var(--text-main); }
+.muted, .small, .sub-id, .bloque .hint { color: var(--text-muted); }
+
+.bloque.final { border-color: var(--border-accent); }
+.bloque.final h3 { color: var(--border-accent); }
+.alerta, .tips-box { border-color: var(--border-accent); background: #fff4e5; }
+.alerta { color: var(--text-main); }
+
+.btn-grande, .btn-medio {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+.btn-grande:hover, .btn-medio:hover { background: var(--accent-hover); }
+
+header nav a.active {
+  background: #e7f3ff;
+  color: var(--accent);
+}
+
+.consola-output { background: var(--bg-code); color: var(--text-code); }
+.out-exito, .out-extra { color: var(--color-extra); }
+.out-fallo { color: var(--color-fallo); }
+.out-nav { color: #60a5fa; }
+.out-cmd { color: var(--color-extra); }
+
+.bug-codigo { background: var(--bg-code); color: var(--text-code); }
+.bug-codigo .malo { background: #5a1a1a; color: #ffd0d0; }
+.bug-codigo .bueno { background: #1a4a1a; color: #d0ffd0; }
+
+code {
+  background: var(--bg-soft);
+  color: var(--text-main);
+}
+
+.lecciones-box { border-color: var(--border-success); }
+.lecciones-box h4 { color: var(--border-success); }
+.bug-status.resuelto { color: var(--color-exito); font-weight: 600; }
+.bug-status.no-resuelto { color: var(--color-info); }
+.bug-dificultad.alta { background: #ffe0d0; color: #8a2a00; }
+.bug-dificultad.media { background: var(--bg-soft); color: var(--text-main); }
+.bug-dificultad.baja { background: #d8f5d8; color: #2a6a2a; }
+
+.pista-display { background: #fff4e5; border-left: 3px solid var(--color-info); color: #92400e; }
+.explain-btn { background: #fff4e5; color: #92400e; border-color: var(--color-info); }
+.explicacion { background: #fffefa; border-left: 3px solid var(--color-info); }

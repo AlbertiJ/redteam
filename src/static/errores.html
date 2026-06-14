@@ -1,114 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>RedTeam — Doc de Errores</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
-  header { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-  h1 { color: #58a6ff; margin-bottom: 6px; }
-  .back { color: #58a6ff; text-decoration: none; font-size: 13px; }
-  .search { width: 100%; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 10px; border-radius: 4px; font-size: 14px; margin-bottom: 12px; }
-  .menu-item { background: #161b22; border: 1px solid #30363d; border-radius: 6px; margin-bottom: 6px; }
-  .menu-header { padding: 14px 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-  .menu-header:hover { background: #1c2128; }
-  .menu-header h3 { color: #79c0ff; font-size: 15px; }
-  .menu-content { padding: 0 18px 16px; display: none; }
-  .menu-content.open { display: block; }
-  .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-  .badge.s2xx { background: #238636; }
-  .badge.s4xx { background: #d29922; color: black; }
-  .badge.s5xx { background: #f85149; }
-  .seccion { margin-top: 12px; }
-  .seccion h4 { color: #d2a8ff; font-size: 13px; text-transform: uppercase; margin-bottom: 6px; }
-  .seccion p { color: #c9d1d9; line-height: 1.6; font-size: 14px; }
-  .seccion pre { background: #0d1117; padding: 10px; border-radius: 4px; color: #79c0ff; font-size: 12px; margin-top: 6px; }
-  .alerta { background: #1f3a52; border-left: 3px solid #d29922; padding: 10px; border-radius: 4px; margin-top: 8px; font-size: 13px; }
-  .alerta.critico { border-color: #f85149; background: #3a1f1f; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doc de Errores — RedTeam Lab v4</title>
+  <link rel="stylesheet" href="/static/style-colors.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme.js"></script>
 </head>
 <body>
-<a href="/" class="back">← Volver al índice</a>
-<header>
-  <h1>📚 Documentación por código de error</h1>
-  <p style="color: #8b949e;">Hacé clic en cada código para ver explicación + qué significa en pentesting + ejemplo real del lab.</p>
-</header>
+  <div class="brightness-bar" id="brightnessBar" style="display:none;">
+    <label>Brillo: <input type="range" id="brightnessSlider" min="30" max="100" value="100"></label>
+    <button class="close-bright" id="closeBright">×</button>
+  </div>
 
-<input class="search" id="search" placeholder="🔍 Buscar por código, palabra clave...">
+  <header>
+    <h1>🛰️ RedTeam Lab v4</h1>
+    <p class="sub">Qué significan los códigos HTTP</p>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/static/wizard.html">Cargar DB</a>
+      <a href="/static/dbbuilder.html">DB Builder</a>
+      <a href="/static/detective.html">Detective</a>
+      <a href="/static/practicas.html">Práctica</a>
+      <button class="bright-btn" id="brightBtn">🌗 Brillo</button>
+    </nav>
+  </header>
 
-<div id="menu"></div>
+  <main class="home">
+    <section class="intro">
+      <h2>📚 Códigos HTTP</h2>
+      <p>Cuando la API responde, te tira un número. Acá te explico qué significa cada uno.</p>
+    </section>
 
-<script>
-const SID = sessionStorage.getItem('sid') || (sessionStorage.setItem('sid', Math.random().toString(36).slice(2)), sessionStorage.getItem('sid'));
-let allDocs = [];
-
-async function track(tipo, target, contexto='') {
-  await fetch('http://127.0.0.1:8000/api/v1/track', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({tipo, target, contexto, session_id: SID})});
-}
-
-async function cargar() {
-  const r = await fetch('http://127.0.0.1:8000/api/v1/doc/errores');
-  const lista = await r.json();
-  allDocs = await Promise.all(lista.map(async d => {
-    const r2 = await fetch(`http://127.0.0.1:8000/api/v1/doc/error/${d.codigo}`);
-    return await r2.json();
-  }));
-  renderizar(allDocs);
-}
-
-function renderizar(docs) {
-  const cont = document.getElementById('menu');
-  cont.innerHTML = docs.map(d => {
-    const codigo = parseInt(Object.keys(DOC_ERRORES_DISPLAY).find(k => DOC_ERRORES_DISPLAY[k].titulo === d.titulo)) || 0;
-    const clase = d.titulo.startsWith('5') ? 's5xx' : d.titulo.startsWith('4') ? 's4xx' : 's2xx';
-    return `
-      <div class="menu-item">
-        <div class="menu-header" onclick="toggle('${d.titulo}')">
-          <h3>${d.titulo}</h3>
-          <span class="badge ${clase}">${d.titulo.split(' ')[0]}</span>
-        </div>
-        <div class="menu-content" id="m-${d.titulo.replace(/\s/g,'')}">
-          <div class="seccion">
-            <h4>📖 Qué significa</h4>
-            <p>${d.descripcion}</p>
-          </div>
-          <div class="seccion">
-            <h4>🎯 En pentesting</h4>
-            <p>${d.en_pentest}</p>
-          </div>
-          <div class="seccion">
-            <h4>💻 Ejemplo real del lab</h4>
-            <pre>${d.ejemplo_real}</pre>
-          </div>
-        </div>
+    <section class="bloque-grid">
+      <div class="bloque">
+        <h3>200 OK</h3>
+        <p>Todo bien. La request funcionó.</p>
       </div>
-    `;
-  }).join('');
-}
+      <div class="bloque">
+        <h3>400 Bad Request</h3>
+        <p>Tu request está mal. Te falta un campo, o mandaste un tipo de dato incorrecto.</p>
+      </div>
+      <div class="bloque">
+        <h3>401 Unauthorized</h3>
+        <p>Necesitás estar autenticado. Te falta el token o el token es inválido.</p>
+      </div>
+      <div class="bloque">
+        <h3>403 Forbidden</h3>
+        <p>Estás autenticado pero no tenés permiso para este recurso.</p>
+      </div>
+      <div class="bloque">
+        <h3>404 Not Found</h3>
+        <p>El recurso no existe. La URL está mal, o el ID no corresponde a nada.</p>
+      </div>
+      <div class="bloque">
+        <h3>405 Method Not Allowed</h3>
+        <p>El verbo HTTP no está permitido para este endpoint. Ej: mandás POST a algo que solo acepta GET.</p>
+      </div>
+      <div class="bloque">
+        <h3>500 Internal Server Error</h3>
+        <p>El server explotó. Bug. Reportalo si lo ves.</p>
+      </div>
+      <div class="bloque">
+        <h3>503 Service Unavailable</h3>
+        <p>El server está sobrecargado o en mantenimiento.</p>
+      </div>
+    </section>
+  </main>
 
-const DOC_ERRORES_DISPLAY = {200:1, 401:1, 403:1, 404:1, 405:1, 500:1, 503:1};
+  <footer>
+    <p>RedTeam Lab v4 · Hecho por <b>Juan Alberti</b> (AlbertiJ) con ayuda de <b>Mavis</b></p>
+  </footer>
 
-function toggle(titulo) {
-  const el = document.getElementById('m-' + titulo.replace(/\s/g,''));
-  el.classList.toggle('open');
-  track('click', 'doc_error_' + titulo);
-}
-
-document.getElementById('search').oninput = (e) => {
-  const q = e.target.value.toLowerCase();
-  const filtrados = allDocs.filter(d =>
-    d.titulo.toLowerCase().includes(q) ||
-    d.descripcion.toLowerCase().includes(q) ||
-    d.en_pentest.toLowerCase().includes(q) ||
-    d.ejemplo_real.toLowerCase().includes(q)
-  );
-  renderizar(filtrados);
-};
-
-cargar();
-track('navegacion', 'errores', 'carga');
-</script>
+  <script>
+    const btn = document.getElementById('brightBtn');
+    const bar = document.getElementById('brightnessBar');
+    const slider = document.getElementById('brightnessSlider');
+    const close = document.getElementById('closeBright');
+    function aplicarBrillo(v) {
+      document.documentElement.style.filter = `brightness(${v}%)`;
+      localStorage.setItem('brightness', v);
+    }
+    btn.onclick = () => bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+    close.onclick = () => bar.style.display = 'none';
+    slider.oninput = (e) => aplicarBrillo(e.target.value);
+    const saved = localStorage.getItem('brightness');
+    if (saved) { slider.value = saved; aplicarBrillo(saved); }
+  </script>
 </body>
 </html>

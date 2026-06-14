@@ -92,25 +92,20 @@
 
     <section class="bloque">
       <form class="wizard-form" id="formCarga">
-        <label for="jsonInput">JSON de tu DB:</label>
-        <textarea id="jsonInput" placeholder='Pegá acá el JSON...'></textarea>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5em;">
+          <label for="jsonInput" style="margin: 0;">JSON de tu DB:</label>
+          <button type="button" class="btn-medio" id="btnEjemplo" style="padding: 0.4em 0.8em; font-size: 0.85em;">📋 Cargar ejemplo</button>
+        </div>
+        <textarea id="jsonInput" placeholder='Pegá acá el JSON...' style="min-height: 280px;"></textarea>
 
         <div class="help">
-          ↓ Ejemplo — copialo y modificalo:
+          ↓ Ejemplo — lo que te va a cargar el botón de arriba (sin tildes para no romper el JSON):
         </div>
         <div class="wizard-ejemplo">
-{
-  "nombre": "bandas_favoritas",
-  "campos": ["id", "banda", "tema", "anio"],
-  "datos": [
-    {"id":"1", "banda":"Soda Stereo", "tema":"De música ligera", "anio":"1990"},
-    {"id":"2", "banda":"Patricio Rey", "tema":"Calavera", "anio":"1985"},
-    {"id":"3", "banda":"Redondos", "tema":"Jijiji", "anio":"1986"}
-  ]
-}
+{"nombre": "bandas_favoritas", "campos": ["id", "banda", "tema", "anio"], "datos": [{"id": 1, "banda": "Soda Stereo", "tema": "De musica ligera", "anio": 1990}, {"id": 2, "banda": "Patricio Rey", "tema": "Calavera", "anio": 1985}, {"id": 3, "banda": "Redondos", "tema": "Jijiji", "anio": 1986}]}
         </div>
 
-        <button type="submit" class="btn-grande" style="margin-top: 1em;">📤 Cargar DB</button>
+        <button type="submit" class="btn-grande" style="margin-top: 1.2em;">📤 Cargar DB</button>
       </form>
 
       <div class="wizard-status" id="status" style="display:none;"></div>
@@ -154,7 +149,7 @@
       const texto = document.getElementById('jsonInput').value.trim();
       if (!texto) {
         status.className = 'wizard-status error';
-        status.textContent = '❌ Pegá un JSON primero.';
+        status.innerHTML = '❌ <b>Pegá un JSON primero.</b> Si no sabés cómo, hacé click en el botón <b>📋 Cargar ejemplo</b> arriba.';
         status.style.display = 'block';
         return;
       }
@@ -162,26 +157,41 @@
       try {
         body = JSON.parse(texto);
       } catch (err) {
+        // Detalle útil: posición del error + carácter problemático
+        const match = err.message.match(/position (\d+)/);
+        let detalle = '';
+        if (match) {
+          const pos = parseInt(match[1]);
+          const problematico = texto.substring(Math.max(0, pos-15), pos+15);
+          const numLinea = texto.substring(0, pos).split('\n').length;
+          detalle = `<br><br>📍 <b>Línea ${numLinea}, carácter cerca de la posición ${pos}:</b><br><code style="background:#fff; padding:0.2em 0.5em; border-radius:3px;">...${problematico.replace(/[<]/g, '&lt;')}...</code><br><br>💡 <b>¿Por qué falla?</b><br>• Coma de más o de menos<br>• Comilla <code>"</code> en lugar de <code>'</code> o al revés<br>• Llave <code>{</code> o <code>}</code> sin cerrar<br>• Tildes o caracteres especiales (en JSON estricto no se pueden usar letras con tilde dentro de strings)`;
+        }
         status.className = 'wizard-status error';
-        status.textContent = `❌ JSON inválido: ${err.message}`;
+        status.innerHTML = `❌ <b>JSON inválido:</b> ${err.message}${detalle}`;
         status.style.display = 'block';
         return;
       }
       if (!body.nombre || !body.campos || !body.datos) {
         status.className = 'wizard-status error';
-        status.textContent = '❌ Faltan campos. Necesita: nombre, campos, datos.';
+        status.innerHTML = '❌ <b>Faltan campos.</b> El JSON necesita: <code>nombre</code>, <code>campos</code> y <code>datos</code>.';
+        status.style.display = 'block';
+        return;
+      }
+      if (!Array.isArray(body.campos) || !Array.isArray(body.datos)) {
+        status.className = 'wizard-status error';
+        status.innerHTML = '❌ <b>Formato incorrecto.</b> <code>campos</code> y <code>datos</code> tienen que ser arrays (listas).';
         status.style.display = 'block';
         return;
       }
       if (body.campos[0] !== 'id') {
         status.className = 'wizard-status error';
-        status.textContent = '❌ El primer campo tiene que ser "id".';
+        status.innerHTML = `❌ <b>El primer campo tiene que ser "id"</b> (es la convención del lab). Vos pusiste: <code>${body.campos[0]}</code>`;
         status.style.display = 'block';
         return;
       }
       if (body.campos.length < 3 || body.campos.length > 100) {
         status.className = 'wizard-status error';
-        status.textContent = '❌ Mínimo 3 campos, máximo 100.';
+        status.innerHTML = `❌ <b>Mínimo 3 campos, máximo 100.</b> Vos pusiste: <code>${body.campos.length}</code>`;
         status.style.display = 'block';
         return;
       }
@@ -194,11 +204,11 @@
         const j = await r.json();
         if (j.ok) {
           status.className = 'wizard-status ok';
-          status.innerHTML = `✅ DB "<b>${body.nombre}</b>" creada con ${body.datos.length} registros. <a href="/static/dbbuilder.html">Ir al DB Builder →</a>`;
+          status.innerHTML = `✅ <b>DB "${body.nombre}" creada</b> con ${body.datos.length} registros. <a href="/static/dbbuilder.html">Ir al DB Builder →</a>`;
           status.style.display = 'block';
         } else {
           status.className = 'wizard-status error';
-          status.textContent = `❌ ${j.error || 'Error al crear la DB'}`;
+          status.textContent = `❌ ${j.error || j.detail || 'Error al crear la DB'}`;
           status.style.display = 'block';
         }
       } catch (err) {
@@ -206,6 +216,25 @@
         status.textContent = `❌ ${err.message}`;
         status.style.display = 'block';
       }
+    };
+
+    // Botón "Cargar ejemplo" — rellena el textarea con un JSON válido
+    document.getElementById('btnEjemplo').onclick = () => {
+      const ejemplo = `{
+  "nombre": "bandas_favoritas",
+  "campos": ["id", "banda", "tema", "anio"],
+  "datos": [
+    {"id": 1, "banda": "Soda Stereo", "tema": "De musica ligera", "anio": 1990},
+    {"id": 2, "banda": "Patricio Rey", "tema": "Calavera", "anio": 1985},
+    {"id": 3, "banda": "Redondos", "tema": "Jijiji", "anio": 1986}
+  ]
+}`;
+      const ta = document.getElementById('jsonInput');
+      ta.value = ejemplo;
+      ta.focus();
+      // Ocultar status si estaba
+      const status = document.getElementById('status');
+      status.style.display = 'none';
     };
   </script>
 </body>

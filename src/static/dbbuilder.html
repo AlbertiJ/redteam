@@ -195,6 +195,12 @@
     <section class="dbbuilder-section" id="seccionPrecargadas">
       <h2>📦 DBs precargadas <span id="badgeFiltro" class="badge-context" style="display:none;"></span></h2>
       <p id="textoPrecargadas">Hacé clic en una para explorarla, ver su estructura y aprender a consultarla por URL.</p>
+      <p id="textoIntroPrecargadas" style="font-size: 0.9rem; color: #65676b; background: #f0f7ff; padding: 0.6rem 0.9rem; border-radius: 4px; border-left: 3px solid #1877f2;">
+        <b>📌 En esta sección vas a encontrar las 7 DBs precargadas del lab.</b>
+        Son ejemplos pensados para los ejercicios del Detective de Bugs.
+        Podés abrir cualquiera para consultarla por URL,
+        o crear la tuya propia con el tema que quieras (abajo).
+      </p>
       <div class="db-grid" id="dbsPredefinidas">
         <p style="color:#6b7785;">Cargando...</p>
       </div>
@@ -258,6 +264,22 @@
 
       <h3 style="color:var(--accent); margin-top:1.2rem; font-size:1.05rem;">🔗 Consultar por URL (modificando la dirección)</h3>
       <p style="color:#6b7785; font-size:0.88rem; margin-bottom:0.5rem;">La forma "real" de consultar: cambiar la URL del navegador. Acá te dejo ejemplos que podés probar.</p>
+
+      <!-- Mini tutorial pedagógico -->
+      <div style="background: #eef4ff; border-left: 3px solid var(--accent); padding: 0.7rem 0.9rem; border-radius: 4px; font-size: 0.88rem; margin-bottom: 0.7rem;">
+        <b>🎓 ¿Qué hace cada campo?</b><br>
+        <b>Campo a proyectar</b>: qué columna querés VER (ej: <code>nombre</code> muestra solo los nombres).<br>
+        <b>Filtro WHERE</b>: qué condición aplicás (ej: <code>artista = 'Pink Floyd'</code> filtra a Pink Floyd).<br>
+        <b>Límite</b>: cuántos registros querés (ej: <code>5</code> muestra solo 5).<br>
+        <br>
+        💡 <b>Probalo así</b>: dejá campo vacío y filtro vacío, mirá todos los registros. Después escribí un filtro y mirá cómo cambia.
+      </div>
+
+      <!-- Ejemplos clickeables -->
+      <div style="margin-bottom: 0.7rem; font-size: 0.88rem;">
+        <b>Ejemplos para probar</b> (click para autocompletar):
+        <div id="ejemplosFiltros" style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem;"></div>
+      </div>
 
       <div class="consulta-area">
         <div>
@@ -372,7 +394,11 @@
         const slots = [0,1,2].map(i => customs[i] ? customs[i] : null);
         cont2.innerHTML = slots.map((s, i) => s
           ? `<div class="db-card custom" data-slot="${i}" onclick="abrirDBCustom('${s.nombre}')"><h3>🛠️ ${s.nombre}</h3><p class="meta">Custom · click para ver</p></div>`
-          : `<div class="db-card custom" data-slot="${i}" onclick="mostrarFormCustom()"><h3>➕ Slot ${i+1}</h3><p class="vacia">Vacío — click para crear</p></div>`
+          : `<div class="db-card custom" data-slot="${i}" onclick="mostrarFormCustom()">
+               <h3>➕ Slot ${i+1}</h3>
+               <p class="vacia">Vacío — click para crear</p>
+               <p style="font-size:0.78rem; color:#65676b; margin-top:0.3rem;">(al crear te dejamos un ejemplo de música listo para borrar)</p>
+             </div>`
         ).join('');
 
       } catch(e) {
@@ -626,6 +652,50 @@
     // =====================================================================
     cargarDBs();
     track('navegacion', 'dbbuilder', dbFiltrada ? `filtro=${dbFiltrada}` : 'completo');
+
+    // === Ejemplos clickeables de filtros (didáctico) ===
+    function renderEjemplosFiltros() {
+      const info = dbActual ? dbsInfo[dbActual.nombre] : null;
+      const cont = document.getElementById('ejemplosFiltros');
+      if (!cont) return;
+      const campo = info && info.sugerencia_campos
+        ? info.sugerencia_campos.split(',')[1]?.trim() || 'campo'
+        : 'campo';
+      const ejemplos = [
+        {label: '🎵 Solo ' + campo, campo: campo, filtro: ''},
+        {label: '🔍 = valor', campo: '', filtro: `${campo} = 'X'`},
+        {label: '🔍 LIKE %X%', campo: '', filtro: `${campo} LIKE '%X%'`},
+        {label: '🔍 = primer año', campo: '', filtro: 'anio = 1973'},
+        {label: '❌ Sin filtro, límite 1', campo: '', filtro: '', limite: 1},
+      ];
+      cont.innerHTML = ejemplos.map((e, i) =>
+        `<button type="button" class="btn-medio" data-idx="${i}" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;">${e.label}</button>`
+      ).join('');
+      cont.querySelectorAll('button').forEach(btn => {
+        btn.onclick = () => {
+          const idx = parseInt(btn.dataset.idx);
+          const e = ejemplos[idx];
+          document.getElementById('consCampo').value = e.campo;
+          document.getElementById('consFiltro').value = e.filtro;
+          if (e.limite !== undefined) document.getElementById('consLimite').value = e.limite;
+          actualizarURLGenerada();
+        };
+      });
+    }
+    // Re-renderizar ejemplos cuando se abre una DB
+    const _origAbrirDB = abrirDB;
+    abrirDB = async function() {
+      const r = await _origAbrirDB.apply(this, arguments);
+      renderEjemplosFiltros();
+      return r;
+    };
+    const _origAbrirDBCustom = abrirDBCustom;
+    abrirDBCustom = function() {
+      const r = _origAbrirDBCustom.apply(this, arguments);
+      renderEjemplosFiltros();
+      return r;
+    };
+    renderEjemplosFiltros();
   </script>
 </body>
 </html>

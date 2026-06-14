@@ -109,7 +109,8 @@ def raiz():
 # HTMLs del lab - rutas explícitas
 HTMLS_LAB = [
     "practicas.html", "dbbuilder.html", "api_visual.html",
-    "dashboard.html", "errores.html", "mejoras.html"
+    "dashboard.html", "errores.html", "mejoras.html",
+    "detective.html", "wizard.html", "historial.html"
 ]
 
 @app.get("/{nombre_html}", response_class=HTMLResponse, tags=["HTMLs"])

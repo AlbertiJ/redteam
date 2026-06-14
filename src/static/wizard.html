@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cargar DB — RedTeam Lab v4</title>
+  <link rel="stylesheet" href="/static/style-colors.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .wizard-form {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .wizard-form label {
+      display: block;
+      margin: 0.8em 0 0.3em 0;
+      font-weight: 600;
+      color: #1c1e21;
+    }
+    .wizard-form input, .wizard-form textarea {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #dadde1;
+      border-radius: 6px;
+      padding: 0.6em 0.8em;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95em;
+      color: #1c1e21;
+    }
+    .wizard-form textarea { min-height: 240px; resize: vertical; }
+    .wizard-form input:focus, .wizard-form textarea:focus {
+      outline: none;
+      border-color: #1877f2;
+      box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.2);
+    }
+    .wizard-form .help {
+      font-size: 0.85em;
+      color: #65676b;
+      margin-top: 0.3em;
+    }
+    .wizard-status {
+      margin-top: 1em;
+      padding: 0.8em 1em;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .wizard-status.ok { background: #d1fae5; color: #047857; border: 1px solid #10b981; }
+    .wizard-status.error { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; }
+    .wizard-ejemplo {
+      background: #f7f8fa;
+      border: 1px solid #dadde1;
+      border-radius: 6px;
+      padding: 0.8em 1em;
+      margin-top: 0.5em;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+      color: #1c1e21;
+    }
+  </style>
+</head>
+<body>
+  <div class="brightness-bar" id="brightnessBar" style="display:none;">
+    <label>Brillo: <input type="range" id="brightnessSlider" min="30" max="100" value="100"></label>
+    <button class="close-bright" id="closeBright">×</button>
+  </div>
+
+  <header>
+    <h1>🛰️ RedTeam Lab v4</h1>
+    <p class="sub">Cargar tu propia base de datos</p>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/static/wizard.html" class="active">Cargar DB</a>
+      <a href="/static/dbbuilder.html">DB Builder</a>
+      <a href="/static/detective.html">Detective</a>
+      <button class="bright-btn" id="brightBtn">🌗 Brillo</button>
+    </nav>
+  </header>
+
+  <main class="home">
+    <section class="intro">
+      <h2>🗄️ Cargá tu DB en 1 paso</h2>
+      <button class="explain-btn" data-target="ayuda">💡 Cómo funciona</button>
+      <div class="explicacion" id="ayuda-exp" style="display:none;">
+        <b>Pegá un JSON con tu DB y los datos.</b> La DB se crea sola, los datos se cargan, listo.
+        <br><br>
+        Formato: <code>{"nombre": "...", "campos": [...], "datos": [...]}</code>
+        <br><br>
+        <b>Ejemplo abajo.</b> Si querés algo más simple, en <a href="/static/practicas.html">Práctica</a> hay 7 DBs ya listas.
+      </div>
+    </section>
+
+    <section class="bloque">
+      <form class="wizard-form" id="formCarga">
+        <label for="jsonInput">JSON de tu DB:</label>
+        <textarea id="jsonInput" placeholder='Pegá acá el JSON...'></textarea>
+
+        <div class="help">
+          ↓ Ejemplo — copialo y modificalo:
+        </div>
+        <div class="wizard-ejemplo">
+{
+  "nombre": "bandas_favoritas",
+  "campos": ["id", "banda", "tema", "anio"],
+  "datos": [
+    {"id":"1", "banda":"Soda Stereo", "tema":"De música ligera", "anio":"1990"},
+    {"id":"2", "banda":"Patricio Rey", "tema":"Calavera", "anio":"1985"},
+    {"id":"3", "banda":"Redondos", "tema":"Jijiji", "anio":"1986"}
+  ]
+}
+        </div>
+
+        <button type="submit" class="btn-grande" style="margin-top: 1em;">📤 Cargar DB</button>
+      </form>
+
+      <div class="wizard-status" id="status" style="display:none;"></div>
+    </section>
+
+    <section class="intro">
+      <h3>¿Te trabaste?</h3>
+      <p>Si el JSON te confunde, <a href="/static/practicas.html">probá primero con las 7 DBs precargadas</a> y volvé acá después.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>RedTeam Lab v4 · Hecho por <b>Juan Alberti</b> (AlbertiJ) con ayuda de <b>Mavis</b></p>
+  </footer>
+
+  <script>
+    const btn = document.getElementById('brightBtn');
+    const bar = document.getElementById('brightnessBar');
+    const slider = document.getElementById('brightnessSlider');
+    const close = document.getElementById('closeBright');
+    function aplicarBrillo(v) {
+      document.documentElement.style.filter = `brightness(${v}%)`;
+      localStorage.setItem('brightness', v);
+    }
+    btn.onclick = () => bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+    close.onclick = () => bar.style.display = 'none';
+    slider.oninput = (e) => aplicarBrillo(e.target.value);
+    const saved = localStorage.getItem('brightness');
+    if (saved) { slider.value = saved; aplicarBrillo(saved); }
+
+    document.querySelectorAll('.explain-btn').forEach(b => {
+      b.onclick = () => {
+        const exp = document.getElementById(b.dataset.target + '-exp');
+        if (exp) exp.style.display = exp.style.display === 'none' ? 'block' : 'none';
+      };
+    });
+
+    document.getElementById('formCarga').onsubmit = async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('status');
+      const texto = document.getElementById('jsonInput').value.trim();
+      if (!texto) {
+        status.className = 'wizard-status error';
+        status.textContent = '❌ Pegá un JSON primero.';
+        status.style.display = 'block';
+        return;
+      }
+      let body;
+      try {
+        body = JSON.parse(texto);
+      } catch (err) {
+        status.className = 'wizard-status error';
+        status.textContent = `❌ JSON inválido: ${err.message}`;
+        status.style.display = 'block';
+        return;
+      }
+      if (!body.nombre || !body.campos || !body.datos) {
+        status.className = 'wizard-status error';
+        status.textContent = '❌ Faltan campos. Necesita: nombre, campos, datos.';
+        status.style.display = 'block';
+        return;
+      }
+      if (body.campos[0] !== 'id') {
+        status.className = 'wizard-status error';
+        status.textContent = '❌ El primer campo tiene que ser "id".';
+        status.style.display = 'block';
+        return;
+      }
+      if (body.campos.length < 3 || body.campos.length > 100) {
+        status.className = 'wizard-status error';
+        status.textContent = '❌ Mínimo 3 campos, máximo 100.';
+        status.style.display = 'block';
+        return;
+      }
+      try {
+        const r = await fetch('/api/v1/dbbuilder/crear', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(body)
+        });
+        const j = await r.json();
+        if (j.ok) {
+          status.className = 'wizard-status ok';
+          status.innerHTML = `✅ DB "<b>${body.nombre}</b>" creada con ${body.datos.length} registros. <a href="/static/dbbuilder.html">Ir al DB Builder →</a>`;
+          status.style.display = 'block';
+        } else {
+          status.className = 'wizard-status error';
+          status.textContent = `❌ ${j.error || 'Error al crear la DB'}`;
+          status.style.display = 'block';
+        }
+      } catch (err) {
+        status.className = 'wizard-status error';
+        status.textContent = `❌ ${err.message}`;
+        status.style.display = 'block';
+      }
+    };
+  </script>
+</body>
+</html>

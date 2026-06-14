@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historial Técnico — RedTeam Lab v4</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .historial-grid {
+      display: grid;
+      gap: 1.2rem;
+      margin-top: 1.5rem;
+    }
+    .entrada {
+      background: var(--card-bg, #ffffff);
+      border: 1px solid var(--border, #e0e6ed);
+      border-left: 4px solid #1877f2;
+      border-radius: 8px;
+      padding: 1.1rem 1.3rem;
+    }
+    .entrada .fecha {
+      color: #6b7785;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .entrada .bloque {
+      margin: 0.55rem 0;
+      padding-left: 1rem;
+      border-left: 2px solid #e0e6ed;
+    }
+    .entrada .quien {
+      font-weight: 700;
+      color: #1877f2;
+    }
+    .entrada .quien.juan {
+      color: #d97706;
+    }
+    .entrada .quien.mavis {
+      color: #1877f2;
+    }
+    .entrada .quien.ambos {
+      color: #16a34a;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-left: 0.4rem;
+    }
+    .badge.fallo { background: #fee2e2; color: #b91c1c; }
+    .badge.fix   { background: #dcfce7; color: #15803d; }
+    .badge.idea  { background: #fef3c7; color: #b45309; }
+    .badge.ejec  { background: #dbeafe; color: #1d4ed8; }
+    .resumen {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 1rem 1.3rem;
+      margin-top: 1.5rem;
+    }
+    .resumen h3 { margin-top: 0; color: #075985; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>📓 Historial Diario Técnico</h1>
+    <p class="subtitulo">Bitácora honesta de cómo se construyó RedTeam Lab v4</p>
+    <nav class="nav">
+      <a href="/static/index.html">Inicio</a>
+      <a href="/static/wizard.html">Cargar DB</a>
+      <a href="/static/dbbuilder.html">DB Builder</a>
+      <a href="/static/detective.html">Detective</a>
+      <a href="/static/practicas.html">Práctica</a>
+      <a href="/static/api_visual.html">API Visual</a>
+      <a href="/historial" class="active">Historial</a>
+      <button id="brillo" class="brillo-btn">🌗 Brillo</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="bloque-card">
+      <h2>¿Qué es esta página?</h2>
+      <p>
+        Acá está el día a día del proyecto, sin maquillar. Lo que <strong>Mavis falló</strong>,
+        lo que <strong>Juan corrigió</strong>, lo que <strong>Juan sugirió</strong>
+        y lo que <strong>Mavis encaró y ejecutó</strong>. Sirve para que si más adelante
+        alguien (o vos mismo) mira este repo, vea cómo se pensó y se construyó.
+      </p>
+      <p>
+        <strong>Regla del juego:</strong> si algo anda mal y lo arregla Mavis sola, va igual.
+        Si Juan corrige algo, va con su nombre. Sin ocultar errores.
+      </p>
+    </section>
+
+    <div class="historial-grid">
+
+      <div class="entrada">
+        <div class="fecha">📅 Sesión 2026-06-10 — Bootstrap del proyecto</div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis:</span> armó v1.0 con FastAPI + Shadow APIs
+          (admin sin auth, inyección en endpoint de auditoría, info disclosure en /metadatos).
+          <span class="badge ejec">ejecutó</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien juan">Juan sugirió:</span> "no tires choclos, paso a paso".
+          Empezar chiquito, no prometer 100 features.
+          <span class="badge idea">sugirió</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis ejecutó:</span> subió v1.0 a GitHub (commit a6e4e5d)
+          con lo mínimo andando. Sin promesas vacías.
+          <span class="badge ejec">ejecutó</span>
+        </div>
+      </div>
+
+      <div class="entrada">
+        <div class="fecha">📅 Sesión 2026-06-11 — Detector de bugs + 3 opciones</div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis diseñó:</span> v3 con grid 2x2 de 4 cards
+          (precargadas / cargar propia / detective / modo colaborativo).
+          <span class="badge ejec">ejecutó</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien juan">Juan corrigió:</span> "asumí nivel cero, no 4 cards".
+          El "Modo Colaborativo" era una promesa vacía — nadie lo había programado.
+          <span class="badge fix">corrigió</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis encaró y ejecutó:</span> bajó a 3 opciones reales
+          (precargadas, cargar propia DB, detective). Sin "modo colaborativo" porque no existe.
+          <span class="badge ejec">ejecutó</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien juan">Juan sugirió:</span> "asumí nivel cero" → entonces el home
+          no puede tener tecnicismos como "endpoints" o "shadow APIs". Texto llano.
+          <span class="badge idea">sugirió</span>
+        </div>
+      </div>
+
+      <div class="entrada">
+        <div class="fecha">📅 Sesión 2026-06-12 — Diseño Mock D</div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis propuso 5 mockups:</span> 1) Consola oscura, 2) Apple
+          con gradiente, 3) Tarjeta blanca, 4) Pizarra vertical, 5) Mock D (claro, dashboard,
+          atenuador sobre html).
+          <span class="badge ejec">ejecutó</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien juan">Juan eligió:</span> Mock D. "El claro está bueno, me
+          distrae menos que el oscuro."
+          <span class="badge idea">sugirió</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis falló en:</span> en la primera implementación,
+          armé un "Apple genérico" con radial-gradient. No era Mock D.
+          <span class="badge fallo">falló</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis encaró y ejecutó:</span> rehízo el CSS con Mock D
+          real (fondo #f0f2f5, accent #1877f2, atenuador sobre `html` con
+          `documentElement.style.filter`). Sin gradientes.
+          <span class="badge ejec">ejecutó</span>
+        </div>
+      </div>
+
+      <div class="entrada">
+        <div class="fecha">📅 Sesión 2026-06-12 — Wizard de carga de DB</div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis diseñó:</span> wizard de 4 pasos
+          (1. nombre, 2. campos, 3. tipos, 4. datos). "Para que el cadete aprenda".
+          <span class="badge ejec">ejecutó</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien juan">Juan corrigió:</span> "el wizard de 4 pasos es difícil.
+          Hacé un paso, pegar JSON."
+          <span class="badge fix">corrigió</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis encaró y ejecutó:</span> rehízo el wizard a 1 paso.
+          Un textarea con placeholder "Pegá acá el JSON..." + ejemplo copiable
+          + 1 botón "Cargar DB". Cero pasos intermedios.
+          <span class="badge ejec">ejecutó</span>
+        </div>
+      </div>
+
+      <div class="entrada">
+        <div class="fecha">📅 Sesión 2026-06-12 — Bugs del v4</div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis falló en:</span> la función <code>leer_html()</code>
+          buscaba en <code>src/</code> en vez de <code>src/static/</code>.
+          Resultado: 404 al cargar páginas internas.
+          <span class="badge fallo">falló</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis falló en:</span> <code>StaticFiles</code> estaba
+          montado en <code>src/</code> en vez de <code>src/static/</code>. El CSS no
+          se podía servir.
+          <span class="badge fallo">falló</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis falló en:</span> el banner del index
+          tenía URLs sin prefijo <code>/static/</code> (ej: <code>/wizard.html</code>
+          en vez de <code>/static/wizard.html</code>).
+          <span class="badge fallo">falló</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien juan">Juan corrigió:</span> "che, las URLs no andan, probá abrir
+          el index y hacer click en los botones".
+          <span class="badge fix">corrigió</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis encaró y ejecutó:</span> arregló los 3 bugs.
+          Banner corregido, paths de <code>leer_html</code> corregidos, mount de
+          <code>StaticFiles</code> en <code>src/static</code>. Verificado con curl:
+          10/10 endpoints devuelven 200.
+          <span class="badge ejec">ejecutó</span>
+        </div>
+      </div>
+
+      <div class="entrada">
+        <div class="fecha">📅 Sesión 2026-06-13 — Detective de Bugs</div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis ejecutó:</span> Detective de Bugs con 10 bugs
+          escondidos en 5 grupos (URLs mal construidas, Validación, SQL Injection,
+          Autenticación, Info Disclosure). Cada uno con pista + dificultad
+          (Fácil/Medio/Alto) + botón "Marcar como resuelto" + barra de progreso
+          persistente en el navegador.
+          <span class="badge ejec">ejecutó</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien juan">Juan sugirió:</span> "10 bugs en 5 grupos, empezá por los
+          fáciles. Y que el progreso se guarde, no quiero cazar los mismos 2 veces."
+          <span class="badge idea">sugirió</span>
+        </div>
+      </div>
+
+      <div class="entrada">
+        <div class="fecha">📅 Sesión 2026-06-13 — Gemini key (no funcionó)</div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis intentó:</span> integrar Gemini (free tier)
+          para que el Detective de Bugs genere hints dinámicos.
+          <span class="badge ejec">ejecutó</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis falló en:</span> cuota de Gemini free tier
+          agotada. No se pudo.
+          <span class="badge fallo">falló</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien juan">Juan corrigió:</span> "olvidate de la api por ahora,
+          después vemos con tiempo." (Mavis borró la key del secret store para no
+          dejar credenciales colgadas.)
+          <span class="badge fix">corrigió</span>
+        </div>
+      </div>
+
+      <div class="entrada">
+        <div class="fecha">📅 Sesión 2026-06-13 — Verificación final + GIFs</div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis ejecutó:</span> verificación del v4-final-final.
+          Las 3 fallas originales están arregladas (diseño Mock D aplicado, home
+          de 3 opciones, wizard de 1 paso).
+          <span class="badge ejec">ejecutó</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis ejecutó:</span> 3 GIFs de proceso con
+          Playwright headless: gif-index.gif, gif-wizard.gif, gif-detective.gif.
+          <span class="badge ejec">ejecutó</span>
+        </div>
+
+        <div class="bloque">
+          <span class="quien mavis">Mavis ejecutó:</span> esta página de historial técnico.
+          Para que quede registro honesto de cómo se construyó.
+          <span class="badge ejec">ejecutó</span>
+        </div>
+      </div>
+
+    </div>
+
+    <section class="resumen">
+      <h3>📊 Resumen del flujo de trabajo</h3>
+      <p><strong>Lo que funciona:</strong> el ciclo "Mavis propone → Juan corrige → Mavis
+      ejecuta" es lento pero honesto. Cada corrección de Juan viene con un motivo claro.
+      Cada ejecución de Mavis se verifica.</p>
+      <p><strong>Lo que NO funciona:</strong> a veces Mavis sobrestima (asume cosas, prometo
+      features que después no se programan) y Juan tiene que volver a poner los pies en
+      la tierra.</p>
+      <p><strong>Regla que mantenemos:</strong> no subir nada a GitHub que no ande. Por eso
+      v1.0 está publicada, v4 todavía no (verificación primero, ZIP, después push).</p>
+    </section>
+
+    <p style="text-align:center; color:#6b7785; margin-top:2rem;">
+      <a href="/static/index.html">← Volver al inicio</a>
+    </p>
+  </main>
+
+  <footer class="footer">
+    <p>RedTeam Lab v4 · Hecho por <strong>Juan Alberti (AlbertiJ)</strong> con ayuda de <strong>Mavis</strong></p>
+    <p>Open source · Solo para aprendizaje ético · No apto para producción real</p>
+  </footer>
+
+  <script>
+    // Atenuador de brillo (sobre html, no sobre un div)
+    const btn = document.getElementById("brillo");
+    let nivel = 100;
+    const saved = localStorage.getItem("brillo-v4");
+    if (saved) {
+      nivel = parseInt(saved);
+      document.documentElement.style.filter = `brightness(${nivel}%)`;
+    }
+    btn.addEventListener("click", () => {
+      if (nivel === 100) nivel = 60;
+      else if (nivel === 60) nivel = 100;
+      document.documentElement.style.filter = `brightness(${nivel}%)`;
+      localStorage.setItem("brillo-v4", nivel);
+    });
+  </script>
+</body>
+</html>

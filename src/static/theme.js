@@ -214,13 +214,25 @@
         </div>
       </div>
 
-      <button class="reset" id="themeReset">↺ Volver al tema original</button>
+      <div style="display: flex; gap: 0.4rem; align-items: center;">
+        <span id="themeAplicado" style="color: var(--color-exito); font-size: 0.78rem; font-weight: 600; flex: 1;">✓ Aplicado</span>
+        <button class="reset" id="themeReset" style="flex: 1; margin: 0;">↺ Volver al original</button>
+      </div>
     `;
 
     document.body.appendChild(panel);
 
     // Eventos
     document.getElementById('themePanelClose').onclick = cerrarPanel;
+
+    function marcarAplicado() {
+      const span = document.getElementById('themeAplicado');
+      if (span) {
+        span.textContent = '✓ Aplicado';
+        span.style.color = 'var(--color-exito)';
+        setTimeout(() => { span.textContent = '✓ Aplicado'; }, 800);
+      }
+    }
 
     document.getElementById('themeOpciones').onclick = (e) => {
       const btn = e.target.closest('button[data-tema]');
@@ -231,6 +243,7 @@
       // actualizar visual
       document.querySelectorAll('#themeOpciones button').forEach(b => b.classList.remove('activo'));
       btn.classList.add('activo');
+      marcarAplicado();
     };
 
     document.getElementById('fontsizeOpciones').onclick = (e) => {
@@ -241,6 +254,7 @@
       guardar(KEY_FONTSIZE, fs);
       document.querySelectorAll('#fontsizeOpciones button').forEach(b => b.classList.remove('activo'));
       btn.classList.add('activo');
+      marcarAplicado();
     };
 
     document.getElementById('fontOpciones').onclick = (e) => {
@@ -251,6 +265,7 @@
       guardar(KEY_FONT, f);
       document.querySelectorAll('#fontOpciones button').forEach(b => b.classList.remove('activo'));
       btn.classList.add('activo');
+      marcarAplicado();
     };
 
     document.getElementById('themeReset').onclick = () => {

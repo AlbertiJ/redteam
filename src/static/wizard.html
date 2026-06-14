@@ -114,6 +114,21 @@
       <div class="wizard-status" id="status" style="display:none;"></div>
     </section>
 
+    <section class="intro" id="urlPreview" style="display:none;">
+      <h3>🔗 ¿Qué URL se va a armar con tu DB?</h3>
+      <p>Cuando hacés click en <b>📤 Cargar DB</b>, el server arma una URL como esta para que después puedas consultar los datos:</p>
+      <div class="wizard-ejemplo" id="urlPreviewBox" style="background: #eef4ff; border-left: 3px solid var(--accent); font-size: 0.9em;">
+        <code id="urlPreviewText">http://127.0.0.1:8000/api/v1/dbbuilder/consultar?db=???&amp;limite=20</code>
+      </div>
+      <p style="font-size: 0.9em; color: #65676b; margin-top: 0.8em;">
+        📌 <b>Lo que aprendés acá</b>: el nombre que pongas en <code>nombre</code> va a ser el parámetro <code>db=</code> de la URL.
+        Esos mismos datos van a aparecer cuando consultes la DB.
+        <br><br>
+        ⚠️ <b>Didáctico</b>: en un sistema real, lo que metés en el JSON se sanitiza y valida antes de usarse.
+        Acá no (es un lab). Eso es lo que aprende el Detective de Bugs (bug 4A, 5A): <b>por qué validar</b> el input.
+      </p>
+    </section>
+
     <section class="intro">
       <h3>¿Te trabaste?</h3>
       <p>Si el JSON te confunde, <a href="/static/practicas.html">probá primero con las 7 DBs precargadas</a> y volvé acá después.</p>
@@ -254,7 +269,34 @@
       // Ocultar status si estaba
       const status = document.getElementById('status');
       status.style.display = 'none';
+      // Mostrar y actualizar el preview de URL
+      actualizarPreviewURL();
     };
+
+    // === PREVIEW DE URL EN TIEMPO REAL ===
+    function actualizarPreviewURL() {
+      const texto = document.getElementById('jsonInput').value.trim();
+      const preview = document.getElementById('urlPreview');
+      const previewText = document.getElementById('urlPreviewText');
+      if (!texto) {
+        preview.style.display = 'none';
+        return;
+      }
+      let body;
+      try { body = JSON.parse(texto); }
+      catch (e) {
+        preview.style.display = 'none';
+        return;
+      }
+      if (!body.nombre) {
+        preview.style.display = 'none';
+        return;
+      }
+      preview.style.display = 'block';
+      const base = window.location.origin;
+      previewText.innerHTML = `${base}/api/v1/dbbuilder/consultar?db=<b>${body.nombre}</b>&amp;limite=20`;
+    }
+    document.getElementById('jsonInput').addEventListener('input', actualizarPreviewURL);
   </script>
 </body>
 </html>

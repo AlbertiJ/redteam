@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RedTeam Lab v3.1 — Laboratorio de API Discovery + DB Builder + Tracking
+RedTeam Lab v4.0 — Laboratorio de API Discovery + DB Builder + Detective de Bugs + Tracking
 Microservicio FastAPI con:
   • Shadow APIs escondidas
   • Information disclosure
@@ -731,17 +731,20 @@ def leer_html(nombre: str) -> str:
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("RedTeam Lab v3.1 — Lab completo")
+    print("RedTeam Lab v4.0 — Lab completo")
     print("=" * 60)
     print("URLs principales:")
     print("  http://127.0.0.1:8000/              → índice")
-    print("  http://127.0.0.1:8000/docs          → Swagger oficial (incompleto)")
+    print("  http://127.0.0.1:8000/docs          → Swagger oficial")
     print("")
     print("HTMLs del lab:")
     print("  /static/practicas.html  → menú de práctica + escenarios")
+    print("  /static/wizard.html     → cargar tu propia DB en 1 paso")
     print("  /static/dbbuilder.html  → constructor de DBs")
     print("  /static/api_visual.html → playground de inyección por URL")
     print("  /static/dashboard.html  → dashboard de hallazgos")
+    print("  /static/detective.html  → Detective de Bugs (10 bugs)")
+    print("  /static/historial.html  → bitácora honesta del proyecto")
     print("  /static/errores.html    → documentación por código de error")
     print("=" * 60)
     uvicorn.run(app, host="127.0.0.1", port=8000)

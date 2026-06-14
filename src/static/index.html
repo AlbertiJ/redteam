@@ -1,88 +1,101 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>RedTeam Lab v3.1 — Índice</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 30px; }
-  h1 { color: #58a6ff; font-size: 32px; margin-bottom: 8px; }
-  .sub { color: #8b949e; margin-bottom: 30px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-  .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; transition: all 0.2s; cursor: pointer; }
-  .card:hover { transform: translateY(-4px); border-color: #58a6ff; }
-  .card h2 { color: #58a6ff; font-size: 18px; margin-bottom: 8px; }
-  .card p { color: #8b949e; font-size: 14px; line-height: 1.5; }
-  .icon { font-size: 32px; margin-bottom: 12px; }
-  a { text-decoration: none; color: inherit; }
-  footer { text-align: center; color: #6e7681; margin-top: 40px; font-size: 12px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RedTeam Lab v4 — Inicio</title>
+  <link rel="stylesheet" href="/static/style-colors.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme.js"></script>
 </head>
 <body>
-<h1>🛰️ RedTeam Lab v3.1</h1>
-<p class="sub">Laboratorio de API Discovery, Shadow API Detection & DB Manipulation</p>
+  <div class="brightness-bar" id="brightnessBar" style="display:none;">
+    <label>Brillo: <input type="range" id="brightnessSlider" min="30" max="100" value="100"></label>
+    <button class="close-bright" id="closeBright">×</button>
+  </div>
 
-<div class="grid">
-  <a href="/practicas.html">
-    <div class="card">
-      <div class="icon">🎯</div>
-      <h2>Menú de Práctica</h2>
-      <p>Activá vectores de ataque, ajustá la dificultad, lanzá escenarios paso a paso. Todo visual, sin consola.</p>
-    </div>
-  </a>
-  <a href="/dbbuilder.html">
-    <div class="card">
-      <div class="icon">🗄️</div>
-      <h2>DB Builder</h2>
-      <p>7 DBs precargadas (música, películas, países...) + 3 slots para que armes la tuya. Mín 3 campos, máx 100.</p>
-    </div>
-  </a>
-  <a href="/api_visual.html">
-    <div class="card">
-      <div class="icon">🔍</div>
-      <h2>API Visual</h2>
-      <p>Playground para probar la API. Modificá la URL, descubrí shadow APIs, inyectá payloads. Todo en el browser.</p>
-    </div>
-  </a>
-  <a href="/errores.html">
-    <div class="card">
-      <div class="icon">📚</div>
-      <h2>Doc de Errores</h2>
-      <p>Catálogo de códigos HTTP con explicación, qué significa en pentesting, y ejemplos reales del lab.</p>
-    </div>
-  </a>
-  <a href="/dashboard.html">
-    <div class="card">
-      <div class="icon">📊</div>
-      <h2>Dashboard</h2>
-      <p>Visualizá los hallazgos del discovery: shadow APIs, severidad, categorías. Auto-refresh.</p>
-    </div>
-  </a>
-  <a href="/docs">
-    <div class="card">
-      <div class="icon">📋</div>
-      <h2>Swagger Oficial</h2>
-      <p>El Swagger público (incompleto a propósito). Comparalo con las shadow APIs que encontraste.</p>
-    </div>
-  </a>
-</div>
+  <header>
+    <h1>🛰️ RedTeam Lab v4</h1>
+    <p class="sub">Laboratorio de pentesting ético · Didáctico · Nivel cero</p>
+    <nav>
+      <a href="/" class="active">Inicio</a>
+      <a href="/static/wizard.html">Cargar DB</a>
+      <a href="/static/dbbuilder.html">DB Builder</a>
+      <a href="/static/detective.html">Detective</a>
+      <a href="/static/practicas.html">Práctica</a>
+      <a href="/static/api_visual.html">API Visual</a>
+      <button class="bright-btn" id="brightBtn">🌗 Brillo</button>
+    </nav>
+  </header>
 
-<footer>
-  RedTeam Lab v3.0 — Laboratorio local de pentesting ético
-</footer>
+  <main class="home">
+    <section class="intro">
+      <h2>Bienvenido a RedTeam Lab</h2>
+      <p>Sos un <b>cadete</b> en entrenamiento. Acá vas a aprender pentesting ético haciendo.</p>
+      <p>Tres formas de empezar. Elegí la que más te guste:</p>
+    </section>
 
-<script>
-  // Tracking de clicks en el index
-  fetch('http://127.0.0.1:8000/api/v1/track', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      tipo: 'navegacion',
-      target: 'index',
-      contexto: 'carga_inicial',
-      session_id: sessionStorage.getItem('sid') || (sessionStorage.setItem('sid', Math.random().toString(36).slice(2)), sessionStorage.getItem('sid'))
-    })
-  });
-</script>
+    <section class="bloque-grid">
+      <div class="bloque">
+        <h3>📦 DBs precargadas</h3>
+        <p>7 bases de datos listas para practicar (música, películas, países, etc.). Sin setup, directo a la acción.</p>
+        <a href="/static/practicas.html" class="btn-medio">▶ Empezar con precargadas</a>
+      </div>
+
+      <div class="bloque">
+        <h3>🗄️ Cargar tu propia DB</h3>
+        <p>Cargá tu propia DB (ej: bandas favoritas, clientes, lo que quieras). Después la consultás con la API.</p>
+        <a href="/static/wizard.html" class="btn-medio">▶ Cargar mi DB</a>
+      </div>
+
+      <div class="bloque">
+        <h3>🪲 Detective de Bugs</h3>
+        <p>10 bugs escondidos en el lab. Encontralos y arreglalos. Es para ver cómo se ven los bugs reales.</p>
+        <a href="/static/detective.html" class="btn-medio">🔎 Empezar a cazar</a>
+      </div>
+    </section>
+
+    <section class="intro">
+      <h2>¿Qué es RedTeam Lab?</h2>
+      <button class="explain-btn" data-target="intro">💡 Explicame esto</button>
+      <div class="explicacion" id="intro-exp" style="display:none;">
+        RedTeam Lab es un <b>laboratorio de pentesting ético</b>. Te enseña a encontrar vulnerabilidades en APIs. NO es para hackear cosas reales. Es para practicar en un entorno controlado.
+        <br><br>
+        <b>3 modos de uso:</b>
+        <br>• <b>DBs precargadas:</b> 7 DBs ya listas. Saltás directo a practicar.
+        <br>• <b>Cargar tu DB:</b> vos ponés los datos (bandas, clientes, lo que sea), después los consultás con la API.
+        <br>• <b>Detective:</b> 10 bugs escondidos. Aprendés a encontrarlos y arreglarlos.
+      </div>
+      <p>Hecho para cadetes kinestésicos: <b>asumimos nivel cero</b>, no sabés nada, aprendés haciendo.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>RedTeam Lab v4 · Hecho por <b>Juan Alberti</b> (AlbertiJ) con ayuda de <b>Mavis</b></p>
+    <p class="muted">Open source · Solo para aprendizaje ético · No apto para producción real</p>
+  </footer>
+
+  <script>
+    const btn = document.getElementById('brightBtn');
+    const bar = document.getElementById('brightnessBar');
+    const slider = document.getElementById('brightnessSlider');
+    const close = document.getElementById('closeBright');
+    function aplicarBrillo(v) {
+      document.documentElement.style.filter = `brightness(${v}%)`;
+      localStorage.setItem('brightness', v);
+    }
+    btn.onclick = () => bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+    close.onclick = () => bar.style.display = 'none';
+    slider.oninput = (e) => aplicarBrillo(e.target.value);
+    const saved = localStorage.getItem('brightness');
+    if (saved) { slider.value = saved; aplicarBrillo(saved); }
+
+    document.querySelectorAll('.explain-btn').forEach(b => {
+      b.onclick = () => {
+        const exp = document.getElementById(b.dataset.target + '-exp');
+        if (exp) exp.style.display = exp.style.display === 'none' ? 'block' : 'none';
+      };
+    });
+  </script>
 </body>
 </html>

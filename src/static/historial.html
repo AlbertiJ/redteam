@@ -14,7 +14,7 @@
     .entrada {
       background: var(--card-bg, #ffffff);
       border: 1px solid var(--border, #e0e6ed);
-      border-left: 4px solid #1877f2;
+      border-left: 4px solid var(--accent);
       border-radius: 8px;
       padding: 1.1rem 1.3rem;
     }
@@ -31,13 +31,13 @@
     }
     .entrada .quien {
       font-weight: 700;
-      color: #1877f2;
+      color: var(--accent);
     }
     .entrada .quien.juan {
       color: #d97706;
     }
     .entrada .quien.mavis {
-      color: #1877f2;
+      color: var(--accent);
     }
     .entrada .quien.ambos {
       color: #16a34a;
@@ -64,6 +64,7 @@
     }
     .resumen h3 { margin-top: 0; color: #075985; }
   </style>
+  <script src="/static/theme.js"></script>
 </head>
 <body>
   <header class="header">
@@ -172,7 +173,7 @@
 
         <div class="bloque">
           <span class="quien mavis">Mavis encaró y ejecutó:</span> rehízo el CSS con Mock D
-          real (fondo #f0f2f5, accent #1877f2, atenuador sobre `html` con
+          real (fondo #f0f2f5, accent var(--accent), atenuador sobre `html` con
           `documentElement.style.filter`). Sin gradientes.
           <span class="badge ejec">ejecutó</span>
         </div>

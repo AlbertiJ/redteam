@@ -59,6 +59,27 @@
     .bug-pasos ol { margin: 0.3rem 0 0 1.2rem; padding: 0; }
     .bug-pasos li { margin: 0.2rem 0; }
     .bug-pasos code { background: white; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.85rem; }
+    .bug-probar {
+      background: #f0f9ff;
+      border-left: 3px solid #1877f2;
+      padding: 0.6rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      margin: 0.5rem 0;
+    }
+    .bug-probar strong { color: #1877f2; }
+    .bug-resultado-test {
+      background: #1c1e21;
+      color: #e4e6e9;
+      padding: 0.6rem 0.8rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+      max-height: 200px;
+      overflow: auto;
+      white-space: pre-wrap;
+      margin-top: 0.4rem;
+    }
     .bug-codigo {
       background: #1c1e21;
       color: #e4e6e9;
@@ -187,6 +208,12 @@ if (campo) url += `&campo=${encodeURIComponent(campo)}`;</span></div>
         <h3 class="bug-titulo">No validar input vacío</h3>
         <p>En <code>src/app.py</code>, endpoint <code>/api/v1/dbbuilder/crear</code>.</p>
         <div class="bug-pista">💡 <b>Pista</b>: si el usuario manda <code>{"nombre": ""}</code>, el server ¿qué hace? ¿Devuelve error o crea una DB fantasma?</p>
+        <div class="bug-probar">
+          <strong>🧪 Probalo vos</strong> (manda un POST con nombre vacío):
+          <button class="btn-medio" data-test="bug2a-empty" style="margin-top:0.3rem;">▶️ Mandar {"nombre": ""}</button>
+          <button class="btn-medio" data-test="bug2a-spaces" style="margin-top:0.3rem;">▶️ Mandar {"nombre": "   "}</button>
+          <pre class="bug-resultado-test" data-result="bug2a" style="display:none;"></pre>
+        </div>
         <div class="bug-pasos">
           <strong>📋 Pasos para arreglarlo:</strong>
           <ol>
@@ -341,6 +368,10 @@ if not DB_PASSWORD or not API_KEY:
         <h3 class="bug-titulo">Stack trace visible en errores</h3>
         <p>En <code>app.py</code>, default exception handler.</p>
         <div class="bug-pista">💡 <b>Pista</b>: cuando algo tira error 500, el server muestra TODO el stack trace. Eso le dice al atacante dónde está el código y qué libs usás.</p>
+        <div class="bug-probar">
+          <strong>🧪 Probalo vos</strong> (romper el server con un endpoint que no existe):
+          <a href="/api/v1/endpoint_que_no_existe_xyz" target="_blank" class="bug-link-archivo" style="display:inline-block; margin-top:0.3rem; padding:0.4rem 0.8rem; background:var(--accent,#1877f2); color:white; border-radius:4px; text-decoration:none;">▶️ Abrir endpoint que no existe (rompe 500)</a>
+        </div>
         <div class="bug-pasos">
           <strong>📋 Pasos para arreglarlo:</strong>
           <ol>
@@ -492,6 +523,34 @@ def debug():
 
     // Init
     cargarProgreso();
+
+    // === Botones "Probalo vos" (manda requests reales para ver los bugs en vivo) ===
+    document.querySelectorAll('[data-test]').forEach(btn => {
+      btn.onclick = async () => {
+        const test = btn.dataset.test;
+        const result = document.querySelector(`[data-result="${test.split('-')[0]}"]`);
+        if (!result) return;
+        result.style.display = 'block';
+        result.textContent = '⏳ Mandando request...';
+        try {
+          let url, options;
+          if (test.startsWith('bug2a')) {
+            url = '/api/v1/dbbuilder/crear';
+            const nombre = test === 'bug2a-empty' ? '' : '   ';
+            options = {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({nombre, campos: ['id', 'a', 'b'], datos: []})
+            };
+          }
+          const r = await fetch(url, options);
+          const data = await r.json();
+          result.textContent = `Status: ${r.status} ${r.statusText}\n\n` + JSON.stringify(data, null, 2);
+        } catch (e) {
+          result.textContent = 'Error: ' + e.message;
+        }
+      };
+    });
   </script>
 </body>
 </html>

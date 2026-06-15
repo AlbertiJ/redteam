@@ -171,43 +171,41 @@
         color: var(--accent, #1877f2);
       }
 
-      /* Botón flotante del sidebar - NUNCA tapa la nav (bottom: 70px para no chocar con footer chico) */
+      /* Botón flotante del sidebar - ADENTRO del header (no tapa nada) */
       .sidebar-toggle {
-        position: fixed;
-        bottom: 70px;
-        left: 16px;
-        background: var(--accent, #1877f2);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 42px;
-        height: 42px;
-        font-size: 1.1rem;
+        position: static;
+        background: var(--bg-soft, #f7f8fa);
+        color: var(--text-main, #1c1e21);
+        border: 1px solid var(--border-soft, #dadde1);
+        border-radius: 4px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
         cursor: pointer;
-        z-index: 51;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: transform 0.2s;
+        font-family: inherit;
       }
-      .sidebar-toggle:hover { transform: scale(1.1); }
+      .sidebar-toggle:hover {
+        background: var(--accent-soft, #e7f3ff);
+        border-color: var(--accent, #1877f2);
+        color: var(--accent, #1877f2);
+      }
       .sidebar.collapsed { display: none; }
 
       .notes-toggle {
-        position: fixed;
-        bottom: 70px;
-        right: 16px;
-        background: var(--accent, #1877f2);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 42px;
-        height: 42px;
-        font-size: 1.1rem;
+        position: static;
+        background: var(--bg-soft, #f7f8fa);
+        color: var(--text-main, #1c1e21);
+        border: 1px solid var(--border-soft, #dadde1);
+        border-radius: 4px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
         cursor: pointer;
-        z-index: 51;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: transform 0.2s;
+        font-family: inherit;
       }
-      .notes-toggle:hover { transform: scale(1.1); }
+      .notes-toggle:hover {
+        background: var(--accent-soft, #e7f3ff);
+        border-color: var(--accent, #1877f2);
+        color: var(--accent, #1877f2);
+      }
 
       /* Mover contenido principal cuando sidebars están visibles */
       @media (min-width: 1200px) {

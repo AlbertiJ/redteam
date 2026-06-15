@@ -22,6 +22,14 @@
     return m ? decodeURIComponent(m[2]) : null;
   }
 
+  // Persistencia adicional en sessionStorage (porque la cookie rt_usuario es httponly
+  // y el JS no puede leerla directamente). Lo sincronizamos cuando el server responde.
+  const SESSION_KEY = 'rt_session_usuario';
+  function getSessionUsuario() {
+    // Prioridad: sessionStorage > cookie si está disponible
+    return sessionStorage.getItem(SESSION_KEY) || getCookie('rt_usuario_legible');
+  }
+
   function borrarCookie(name) {
     document.cookie = name + '=; Path=/; Max-Age=0';
   }
@@ -187,6 +195,8 @@
         try {
           const res = await login(nombre);
           usuario = res.nombre;
+          // Persistir en sessionStorage (sobrevive a refresh y a abrir otras pestañas)
+          sessionStorage.setItem(SESSION_KEY, res.nombre);
           sesionInicio = Date.now();
           ultimoSumado = 0;
           iniciarCron();
@@ -287,13 +297,15 @@
     }
   }
 
-  // Auto-recuperar sesión si hay cookie
-  const cookie = getCookie(COOKIE_NAME);
-  if (cookie) {
-    usuario = cookie;
+  // Auto-recuperar sesión: sessionStorage (persistente) > cookie legible > cookie httponly
+  const sesionGuardada = getSessionUsuario();
+  if (sesionGuardada) {
+    usuario = sesionGuardada;
     sesionInicio = Date.now();
     ultimoSumado = 0;
     iniciarCron();
+    // También guardamos en sessionStorage por las dudas
+    sessionStorage.setItem(SESSION_KEY, sesionGuardada);
   }
 
   init();

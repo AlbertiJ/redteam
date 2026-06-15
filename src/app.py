@@ -768,7 +768,9 @@ def auth_login(body: LoginBody, response: Response):
     if not body.nombre or len(body.nombre) < 2 or len(body.nombre) > 30:
         raise HTTPException(400, "El nombre tiene que tener entre 2 y 30 caracteres.")
     res = usuario_login(body.nombre)
+    # 2 cookies: una httponly (seguridad) y otra legible (UX)
     response.set_cookie(key="rt_usuario", value=body.nombre.lower(), max_age=86400 * 30, httponly=True, samesite="lax")
+    response.set_cookie(key="rt_usuario_legible", value=body.nombre.lower(), max_age=86400 * 30, samesite="lax")
     log.info(f"LOGIN: {body.nombre} (nuevo={res['nuevo']})")
     return {
         "ok": True,

@@ -297,11 +297,12 @@
       </div>
 
       <div class="url-generada" id="urlGenerada">// La URL se genera sola</div>
-      <div class="btn-row">
-        <button class="btn-medio" onclick="consultar()">▶️ Ejecutar consulta</button>
-        <button class="btn-medio" onclick="abrirURL()">🌐 Abrir en nueva pestaña</button>
-        <button class="btn-medio" onclick="copiarURL()">📋 Copiar URL</button>
+      <div class="btn-row" style="gap: 0.6rem;">
+        <button class="btn-medio" onclick="consultar()" style="background:var(--accent,#1877f2);color:white;">▶️ Mostrar resultado acá</button>
+        <button class="btn-medio" onclick="abrirURL()" style="background:transparent;color:var(--accent,#1877f2);border:1px solid var(--accent,#1877f2);">🌐 Probar en nueva pestaña</button>
+        <button class="btn-medio" onclick="copiarURL()" style="background:transparent;color:var(--text-muted,#65676b);border:1px solid var(--border-soft,#dadde1);">📋 Copiar URL</button>
       </div>
+      <p style="font-size:0.78rem;color:var(--text-muted,#65676b);margin-top:0.3rem;">💡 <b>"Mostrar resultado acá"</b> ejecuta y muestra abajo. <b>"Probar en nueva pestaña"</b> abre la URL en una pestaña nueva (la respuesta cruda, formato JSON).</p>
 
       <div class="resultado" id="resultadoConsulta">// Acá aparece el resultado...</div>
     </section>

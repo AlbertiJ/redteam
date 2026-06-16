@@ -32,13 +32,33 @@
       /* === LAYOUT 3 COLUMNAS (sidebar.js) === */
       .rt-layout {
         display: grid;
-        grid-template-columns: 220px 1fr 280px;
+        grid-template-columns: auto 1fr auto;
         gap: 1rem;
         max-width: 1500px;
         margin: 1rem auto;
         padding: 0 1.5rem;
         align-items: stretch;
         min-height: calc(100vh - 70px);
+      }
+      .rt-layout > .sidebar,
+      .rt-layout > .notes-panel {
+        width: 240px;
+        min-width: 240px;
+        transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease, opacity 0.2s ease, border-color 0.3s ease;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .rt-layout > .sidebar.collapsed,
+      .rt-layout > .notes-panel.collapsed,
+      .rt-layout > .sidebar.collapsed *,
+      .rt-layout > .notes-panel.collapsed * {
+        width: 0 !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        opacity: 0 !important;
+        overflow: hidden !important;
       }
       .rt-layout > main,
       .rt-layout > .cuerpo {
@@ -131,7 +151,6 @@
         display: flex;
         flex-direction: column;
       }
-      .notes-panel.collapsed { display: none; }
       .notes-panel h4 {
         color: var(--accent, #1877f2);
         font-size: 0.85rem;
@@ -194,34 +213,52 @@
 
       /* Botón flotante del sidebar - ADENTRO del header (no tapa nada) */
       .sidebar-toggle {
-        position: static;
-        background: var(--bg-soft, #f7f8fa);
-        color: var(--text-main, #1c1e21);
-        border: 1px solid var(--border-soft, #dadde1);
-        border-radius: 4px;
-        padding: 0.3rem 0.6rem;
-        font-size: 0.85rem;
+        position: fixed;
+        top: 100px;
+        left: 16px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--accent, #1877f2);
+        color: white;
+        border: none;
+        font-size: 1rem;
         cursor: pointer;
-        font-family: inherit;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 60;
+        display: none;  /* Por defecto oculto, aparece cuando la sidebar está colapsada */
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease;
       }
-      .sidebar-toggle:hover {
-        background: var(--accent-soft, #e7f3ff);
-        border-color: var(--accent, #1877f2);
-        color: var(--accent, #1877f2);
+      body.sidebar-collapsed-izq .sidebar-toggle {
+        display: flex;
       }
-      .sidebar.collapsed { display: none; }
+      .sidebar-toggle:hover { transform: scale(1.1); }
 
       .notes-toggle {
-        position: static;
-        background: var(--bg-soft, #f7f8fa);
-        color: var(--text-main, #1c1e21);
-        border: 1px solid var(--border-soft, #dadde1);
-        border-radius: 4px;
-        padding: 0.3rem 0.6rem;
-        font-size: 0.85rem;
+        position: fixed;
+        top: 100px;
+        right: 16px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--accent, #1877f2);
+        color: white;
+        border: none;
+        font-size: 1rem;
         cursor: pointer;
-        font-family: inherit;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 60;
+        display: none;  /* Por defecto oculto */
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease;
       }
+      body.sidebar-collapsed-der .notes-toggle {
+        display: flex;
+      }
+      .notes-toggle:hover { transform: scale(1.1); }
       .notes-toggle:hover {
         background: var(--accent-soft, #e7f3ff);
         border-color: var(--accent, #1877f2);
@@ -324,13 +361,17 @@ ${nota || '(vacío)'}
 
   // ==================== RENDERIZAR ====================
   function renderSidebarDOM(resueltos, customs) {
+    // Si ya existe el sidebar, no duplicar
+    if (document.getElementById('sidebar')) {
+      return;
+    }
     // === SIDEBAR IZQUIERDO: solo avance + Detective ===
     const sidebar = document.createElement('aside');
     sidebar.className = 'sidebar';
     sidebar.id = 'sidebar';
     sidebar.innerHTML = `
-      <div class="sidebar-section">
-        <h4>📊 Tu avance</h4>
+      <div class="sidebar-section sidebar-header" data-toggle="sidebar">
+        <h4 class="sidebar-title">📊 Tu avance <span class="toggle-icon">◀</span></h4>
         <div class="sidebar-stat">
           <span class="label">🐛 Detective</span>
           <span class="value">${resueltos.length}/10</span>
@@ -376,25 +417,42 @@ ${nota || '(vacío)'}
       };
     });
 
-    // Toggle del sidebar izquierdo
-    const toggle = document.createElement('button');
-    toggle.className = 'sidebar-toggle';
-    toggle.id = 'sidebarToggle';
-    toggle.textContent = '📊';
-    toggle.title = 'Mostrar/ocultar panel izquierdo';
-    toggle.onclick = () => {
-      sidebar.classList.toggle('collapsed');
+    // === TOGGLE del sidebar IZQ ===
+    // 1) Click en el header h4 → colapsa/expande
+    const headerIzq = sidebar.querySelector('[data-toggle="sidebar"]');
+    const toggleIzqIcon = sidebar.querySelector('.toggle-icon');
+    if (headerIzq) {
+      headerIzq.style.cursor = 'pointer';
+      headerIzq.onclick = () => {
+        const collapsed = sidebar.classList.toggle('collapsed');
+        document.body.classList.toggle('sidebar-collapsed-izq', collapsed);
+        if (toggleIzqIcon) {
+          toggleIzqIcon.textContent = collapsed ? '▶' : '◀';
+        }
+      };
+    }
+    // 2) Botón flotante 📊 que aparece cuando la sidebar está colapsada
+    const toggleIzq = document.createElement('button');
+    toggleIzq.className = 'sidebar-toggle';
+    toggleIzq.id = 'sidebarToggle';
+    toggleIzq.textContent = '📊';
+    toggleIzq.title = 'Mostrar/ocultar panel izquierdo';
+    toggleIzq.onclick = () => {
+      const collapsed = sidebar.classList.toggle('collapsed');
+      document.body.classList.toggle('sidebar-collapsed-izq', collapsed);
+      if (toggleIzqIcon) {
+        toggleIzqIcon.textContent = collapsed ? '▶' : '◀';
+      }
     };
-    document.body.appendChild(toggle);
+    document.body.appendChild(toggleIzq);
 
     // === PANEL DERECHO: NOTAS ===
     const notes = document.createElement('aside');
     notes.className = 'notes-panel';
     notes.id = 'notesPanel';
     notes.innerHTML = `
-      <h4>
-        📝 Tus notas
-        <button id="notesPanelClose" aria-label="cerrar">×</button>
+      <h4 class="sidebar-title notes-header" data-toggle="notes">
+        📝 Tus notas <span class="toggle-icon">▶</span>
       </h4>
       <textarea id="sidebarNotas" placeholder="Anotá lo que quieras... se guarda solo. Exportá a PDF o TXT cuando termines.">${getNota().replace(/</g, '&lt;')}</textarea>
       <div class="save-status" id="notasStatus"></div>
@@ -432,18 +490,40 @@ ${nota || '(vacío)'}
         setTimeout(() => { status.textContent = ''; }, 1500);
       }
     };
-    document.getElementById('notesPanelClose').onclick = () => {
-      notes.classList.add('collapsed');
-    };
+    const notesPanelClose = document.getElementById('notesPanelClose');
+    if (notesPanelClose) {
+      notesPanelClose.onclick = () => {
+        notes.classList.add('collapsed');
+      };
+    }
 
-    // Toggle del panel derecho
+    // === TOGGLE del sidebar DER (notas) ===
+    // 1) Click en el header h4 → colapsa/expande
+    const headerDer = notes.querySelector('[data-toggle="notes"]');
+    const toggleDerIcon = notes.querySelector('.toggle-icon');
+    if (headerDer) {
+      headerDer.style.cursor = 'pointer';
+      // Capture phase: se ejecuta ANTES que cualquier otro handler
+      headerDer.addEventListener('click', (e) => {
+        const collapsed = notes.classList.toggle('collapsed');
+        document.body.classList.toggle('sidebar-collapsed-der', collapsed);
+        if (toggleDerIcon) {
+          toggleDerIcon.textContent = collapsed ? '◀' : '▶';
+        }
+      });
+    }
+    // 2) Botón flotante 📝
     const notesToggle = document.createElement('button');
     notesToggle.className = 'notes-toggle';
     notesToggle.id = 'notesToggle';
     notesToggle.textContent = '📝';
     notesToggle.title = 'Mostrar/ocultar notas';
     notesToggle.onclick = () => {
-      notes.classList.toggle('collapsed');
+      const collapsed = notes.classList.toggle('collapsed');
+      document.body.classList.toggle('sidebar-collapsed-der', collapsed);
+      if (toggleDerIcon) {
+        toggleDerIcon.textContent = collapsed ? '◀' : '▶';
+      }
     };
     document.body.appendChild(notesToggle);
   }

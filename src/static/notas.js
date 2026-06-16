@@ -396,10 +396,36 @@
   function init() {
     // Buscar el panel de notas (que sidebar.js ya creó)
     const notesPanel = document.querySelector('.notes-panel');
-    if (!notesPanel) {
-      // Si sidebar.js no creó el panel, reintentar en 500ms
+    const sidebarIzq = document.querySelector('.sidebar');
+    const main = document.querySelector('main');
+    if (!notesPanel || !sidebarIzq || !main) {
+      // Si sidebar.js no creó los elementos, reintentar en 500ms
       setTimeout(init, 500);
       return;
+    }
+
+    // === CREAR WRAPPER DE 3 COLUMNAS (acoplar al diseño) ===
+    if (!document.querySelector('.rt-layout')) {
+      // Crear wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'rt-layout';
+      // Mover los 3 elementos adentro en orden: IZQ → MAIN → DER
+      // 1. Mover la sidebar IZQ
+      sidebarIzq.remove();
+      wrapper.appendChild(sidebarIzq);
+      // 2. El main ya está donde está, lo movemos adentro
+      main.remove();
+      wrapper.appendChild(main);
+      // 3. Mover la sidebar DER
+      notesPanel.remove();
+      wrapper.appendChild(notesPanel);
+      // Insertar el wrapper después de la navbar
+      const navbar = document.querySelector('header') || document.querySelector('nav');
+      if (navbar && navbar.parentNode) {
+        navbar.parentNode.insertBefore(wrapper, navbar.nextSibling);
+      } else {
+        document.body.appendChild(wrapper);
+      }
     }
 
     // Insertar panel Apariencia ARRIBA del h4 "TUS NOTAS" (o del contenido)

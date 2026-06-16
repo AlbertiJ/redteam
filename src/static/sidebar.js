@@ -29,19 +29,40 @@
   function inyectarCSS() {
     if (document.getElementById('sidebar-css')) return;
     const css = `
-      .sidebar {
-        position: fixed;
-        top: 80px;
-        left: 16px;
-        width: 230px;
-        max-height: calc(100vh - 100px);
+      /* === LAYOUT 3 COLUMNAS (sidebar.js) === */
+      .rt-layout {
+        display: grid;
+        grid-template-columns: 220px 1fr 280px;
+        gap: 1rem;
+        max-width: 1500px;
+        margin: 1rem auto;
+        padding: 0 1.5rem;
+        align-items: stretch;
+        min-height: calc(100vh - 70px);
+      }
+      .rt-layout > main,
+      .rt-layout > .cuerpo {
+        min-width: 0;
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-soft, #dadde1);
+        border-radius: 10px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      .rt-layout > main { position: relative; }
+      .sidebar, .notes-panel {
+        position: static;
+        width: auto;
+        max-height: calc(100vh - 80px);
         overflow-y: auto;
         background: var(--bg-card, #ffffff);
         border: 1px solid var(--border-soft, #dadde1);
         border-radius: 10px;
         padding: 1rem 1.1rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        z-index: 50;
+        z-index: 1;
         font-family: var(--font-family-base, sans-serif);
         font-size: 0.88rem;
       }

@@ -13,6 +13,7 @@
   const KEY_TEMA = 'redteam-tema';
   const KEY_FONTSIZE = 'redteam-fontsize';
   const KEY_FONT = 'redteam-font';
+  const KEY_MODO = 'redteam-modo';
 
   const TEMAS = [
     { id: 'azul',    label: 'Azul',    color: '#1877f2' },
@@ -41,9 +42,11 @@
     const tema = localStorage.getItem(KEY_TEMA) || 'azul';
     const fontsize = localStorage.getItem(KEY_FONTSIZE) || 'normal';
     const font = localStorage.getItem(KEY_FONT) || 'system';
+    const modo = localStorage.getItem(KEY_MODO) || 'claro';
     document.documentElement.setAttribute('data-tema', tema);
     document.documentElement.setAttribute('data-fontsize', fontsize);
     document.documentElement.setAttribute('data-font', font);
+    document.documentElement.setAttribute('data-modo', modo);
   }
 
   // ==================== GUARDAR ====================
@@ -272,9 +275,11 @@
       localStorage.removeItem(KEY_TEMA);
       localStorage.removeItem(KEY_FONTSIZE);
       localStorage.removeItem(KEY_FONT);
+      localStorage.removeItem(KEY_MODO);
       document.documentElement.setAttribute('data-tema', 'azul');
       document.documentElement.setAttribute('data-fontsize', 'normal');
       document.documentElement.setAttribute('data-font', 'system');
+      document.documentElement.setAttribute('data-modo', 'claro');
       // refrescar visual del panel
       crearPanel();
     };
@@ -324,5 +329,12 @@
   }
 
   // Exponer para debug
-  window.RedTeamTheme = { aplicarGuardados, abrirPanel, cerrarPanel };
+  window.RedTeamTheme = { aplicarGuardados, abrirPanel, cerrarPanel, setModo };
+
+  // ==================== SET MODO (público) ====================
+  function setModo(modo) {
+    if (modo !== 'claro' && modo !== 'oscuro') return;
+    localStorage.setItem(KEY_MODO, modo);
+    document.documentElement.setAttribute('data-modo', modo);
+  }
 })();

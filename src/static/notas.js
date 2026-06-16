@@ -430,6 +430,7 @@
 
     // Insertar panel Apariencia ARRIBA del h4 "TUS NOTAS" (o del contenido)
     const h4 = notesPanel.querySelector('h4');
+    console.log('notas.js init: ENTRÉ al bloque del h4, notesPanel.id =', notesPanel.id, 'h4 =', h4 ? h4.outerHTML.slice(0, 100) : 'null');
     if (h4 && h4.parentNode) {
       // Ocultar el textarea viejo y los botones viejos (ahora viven en la sección del cuerpo)
       const viejoTextarea = notesPanel.querySelector('#sidebarNotas');

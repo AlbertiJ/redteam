@@ -292,6 +292,40 @@
   margin: 0.6rem 0 0 0;
   font-style: italic;
 }
+.nota-vacio {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted, #65676b);
+  font-size: 0.9rem;
+  background: var(--bg-soft, #f7f8fa);
+  border-radius: 8px;
+  border: 1px dashed var(--border-soft, #dadde1);
+}
+.nota-item-acciones {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.nota-item-restaurar,
+.nota-item-borrar {
+  background: var(--bg-soft, #f7f8fa);
+  border: 1px solid var(--border-soft, #dadde1);
+  color: var(--text-soft, #65676b);
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.nota-item-restaurar:hover {
+  background: var(--accent-soft, rgba(24,119,242,0.1));
+  color: var(--accent, #1877f2);
+}
+.nota-item-borrar:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
 
 /* === EXPORTAR === */
 .exportar-grid {

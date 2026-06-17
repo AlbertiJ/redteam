@@ -29,28 +29,30 @@
   function inyectarCSS() {
     if (document.getElementById('sidebar-css')) return;
     const css = `
-      /* === LAYOUT 3 COLUMNAS (sidebar.js) === */
+      /* === LAYOUT 2 COLUMNAS: cuerpo + notas (sidebar IZQ va abajo, franja) === */
       .rt-layout {
         display: grid;
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: 1fr 300px;
         gap: 1rem;
         max-width: 1500px;
         margin: 1rem auto;
         padding: 0 1.5rem;
-        align-items: stretch;
-        min-height: calc(100vh - 70px);
+        align-items: start;
       }
-      .rt-layout > .sidebar,
+      /* La sidebar IZQ ocupa todo el ancho, debajo del cuerpo y notas */
+      .rt-layout > .sidebar {
+        grid-column: 1 / -1;
+        max-height: none;
+        margin-top: 0.5rem;
+      }
       .rt-layout > .notes-panel {
-        width: 240px;
-        min-width: 240px;
+        width: 300px;
+        min-width: 300px;
         transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease, opacity 0.2s ease, border-color 0.3s ease;
         overflow: hidden;
         flex-shrink: 0;
       }
-      .rt-layout > .sidebar.collapsed,
       .rt-layout > .notes-panel.collapsed,
-      .rt-layout > .sidebar.collapsed *,
       .rt-layout > .notes-panel.collapsed * {
         width: 0 !important;
         min-width: 0 !important;
@@ -63,8 +65,7 @@
       .rt-layout > main,
       .rt-layout > .cuerpo {
         min-width: 0;
-        max-height: calc(100vh - 80px);
-        overflow-y: auto;
+        max-height: none;
         background: var(--bg-card, #ffffff);
         border: 1px solid var(--border-soft, #dadde1);
         border-radius: 10px;
@@ -75,8 +76,8 @@
       .sidebar, .notes-panel {
         position: static;
         width: auto;
-        max-height: calc(100vh - 80px);
-        overflow-y: auto;
+        max-height: none;
+        overflow-y: visible;
         background: var(--bg-card, #ffffff);
         border: 1px solid var(--border-soft, #dadde1);
         border-radius: 10px;
@@ -86,6 +87,15 @@
         font-family: var(--font-family-base, sans-serif);
         font-size: 0.88rem;
       }
+      /* === Sidebar IZQ como franja horizontal ABAJO del cuerpo (layout 2 col) === */
+      .sidebar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.5rem;
+        max-height: none;
+        margin-top: 1rem;
+      }
+      .sidebar .sidebar-section { margin-bottom: 0; }
       .sidebar-section { margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border-soft, #f0f2f5); }
       .sidebar-section:last-child { border-bottom: none; margin-bottom: 0; }
       .sidebar h4 {
@@ -406,8 +416,11 @@ ${nota || '(vacío)'}
         <div class="sidebar-stat"><a href="/static/wizard.html" style="color:var(--accent);text-decoration:none;">📋 Cargar DB</a></div>
       </div>
     `;
-    document.body.appendChild(sidebar);
     document.body.classList.add('sidebar-on');
+    // Insertar el sidebar IZQ como hermano del <main> (en el body).
+    // notas.js lo va a mover adentro del .rt-layout cuando arme el grid.
+    // Por ahora lo metemos al body para que exista en el DOM.
+    document.body.appendChild(sidebar);
 
     // Hacer las cards del Detective scrolleables al bug
     sidebar.querySelectorAll('.sidebar-bug-link').forEach(li => {

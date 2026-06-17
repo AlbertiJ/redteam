@@ -342,16 +342,19 @@
   }
 
   // ==================== SECCIÓN EN EL CUERPO ====================
-  // NOTA: Con layout 2 columnas, las Notas viven SIEMPRE en la sidebar derecha.
-  // No se renderiza nada en el cuerpo (evita duplicación).
+  // Renderiza la sección seleccionada (Historial, Favoritas, etc.) en un contenedor del cuerpo.
   function ensureContenedorCuerpo() {
-    // Devolver un div oculto que nunca se muestra
     let cont = document.getElementById('nota-seccion-cuerpo');
     if (cont) return cont;
     cont = document.createElement('div');
     cont.id = 'nota-seccion-cuerpo';
-    cont.style.display = 'none';
-    document.body.appendChild(cont);
+    cont.className = 'nota-seccion-cuerpo';
+    const main = document.querySelector('main');
+    if (main) {
+      main.appendChild(cont);
+    } else {
+      document.body.appendChild(cont);
+    }
     return cont;
   }
 

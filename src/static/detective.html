@@ -182,7 +182,7 @@
         </div>
         <div class="bug-codigo"><span class="malo">let url = `http://127.0.0.1:8000http://127.0.0.1:8000/api/v1/dbbuilder/consultar?db=${nombre}`;</span></div>
         <div class="bug-codigo"><span class="bueno">let url = `${window.location.origin}/api/v1/dbbuilder/consultar?db=${nombre}`;</span></div>
-        <p class="bug-status" data-status="1a">Estado: <span class="no-resuelto">No resuelto</span></p>
+        <p class="bug-status" data-status="1a">Estado: <span class="no-resuelto">No resuelto</span></div>
         <button class="btn-medio" onclick="resolverBug('1a')">✓ Marcar como resuelto</button>
       </div>
 
@@ -205,7 +205,7 @@
 if (campo) url += '&campo=' + campo;  // FALTA codificar</span></div>
         <div class="bug-codigo"><span class="bueno">let url = `/api/v1/dbbuilder/consultar?db=${nombre}&limite=${limite}`;
 if (campo) url += `&campo=${encodeURIComponent(campo)}`;</span></div>
-        <p class="bug-status" data-status="1b">Estado: <span class="no-resuelto">No resuelto</span></p>
+        <p class="bug-status" data-status="1b">Estado: <span class="no-resuelto">No resuelto</span></div>
         <button class="btn-medio" onclick="resolverBug('1b')">✓ Marcar como resuelto</button>
       </div>
     </div>
@@ -219,7 +219,7 @@ if (campo) url += `&campo=${encodeURIComponent(campo)}`;</span></div>
         <span class="bug-dificultad baja">Fácil</span>
         <h3 class="bug-titulo">No validar input vacío</h3>
         <p>En <code>src/app.py</code>, endpoint <code>/api/v1/dbbuilder/crear</code>.</p>
-        <div class="bug-pista">💡 <b>Pista</b>: si el usuario manda <code>{"nombre": ""}</code>, el server ¿qué hace? ¿Devuelve error o crea una DB fantasma?</p>
+        <div class="bug-pista">💡 <b>Pista</b>: si el usuario manda <code>{"nombre": ""}</code>, el server ¿qué hace? ¿Devuelve error o crea una DB fantasma?</div>
         <div class="bug-probar">
           <strong>🧪 Probalo vos</strong> (manda un POST con nombre vacío):
           <button class="btn-medio" data-test="bug2a-empty" style="margin-top:0.3rem;">▶️ Mandar {"nombre": ""}</button>
@@ -249,7 +249,7 @@ if not nombre:
         <span class="bug-dificultad media">Medio</span>
         <h3 class="bug-titulo">Tipo de dato incorrecto</h3>
         <p>En <code>app.py</code>, endpoint <code>/api/v1/dbbuilder/consultar</code>.</p>
-        <div class="bug-pista">💡 <b>Pista</b>: si el usuario manda <code>limite=uchos</code>, el server ¿qué hace? Probálo: <a href="/api/v1/dbbuilder/consultar?db=musica&limite=uchos" target="_blank" class="bug-link-archivo">abrir este link</a>.</p>
+        <div class="bug-pista">💡 <b>Pista</b>: si el usuario manda <code>limite=uchos</code>, el server ¿qué hace? Probálo: <a href="/api/v1/dbbuilder/consultar?db=musica&limite=uchos" target="_blank" class="bug-link-archivo">abrir este link</a>.</div>
         <div class="bug-pasos">
           <strong>📋 Pasos para arreglarlo:</strong>
           <ol>
@@ -279,7 +279,7 @@ limite = max(1, min(1000, limite))</span></div>
         <span class="bug-dificultad alta">Alto</span>
         <h3 class="bug-titulo">Concatenar input en SELECT</h3>
         <p>En <code>app.py</code>, función <code>api_dbbuilder_consultar</code>.</p>
-        <div class="bug-pista">💡 <b>Pista</b>: el query se arma con f-string <code>f"...{input}..."</code> o con <code>+</code>. Cualquier input del usuario debería ir como placeholder <code>?</code>.</p>
+        <div class="bug-pista">💡 <b>Pista</b>: el query se arma con f-string <code>f"...{input}..."</code> o con <code>+</code>. Cualquier input del usuario debería ir como placeholder <code>?</code>.</div>
         <div class="bug-pasos">
           <strong>📋 Pasos para arreglarlo:</strong>
           <ol>
@@ -301,7 +301,7 @@ cursor.execute(sql, (f"%{filtro}%",))  // parametrizado, seguro</span></div>
         <span class="bug-dificultad alta">Alto</span>
         <h3 class="bug-titulo">INSERT sin prepared statements</h3>
         <p>En <code>db/db.py</code>, función de insert.</p>
-        <div class="bug-pista">💡 <b>Pista</b>: el INSERT arma los VALUES concatenando strings. Cualquier input del usuario debería ir como placeholder <code>?</code>.</p>
+        <div class="bug-pista">💡 <b>Pista</b>: el INSERT arma los VALUES concatenando strings. Cualquier input del usuario debería ir como placeholder <code>?</code>.</div>
         <div class="bug-pasos">
           <strong>📋 Pasos para arreglarlo:</strong>
           <ol>
@@ -327,7 +327,7 @@ conn.execute(f"INSERT INTO (tabla) ({cols_quoted}) VALUES ({placeholders})", tup
         <span class="bug-dificultad media">Medio</span>
         <h3 class="bug-titulo">Credenciales hardcoded</h3>
         <p>En <code>app.py</code>, en algún lugar de la config.</p>
-        <div class="bug-pista">💡 <b>Pista</b>: las credenciales están escritas en el código fuente. Cualquiera que abre el repo las ve. Debería abrir el repo las ve. Debería leerlas de variables de entorno sin default.</p>
+        <div class="bug-pista">💡 <b>Pista</b>: las credenciales están escritas en el código fuente. Cualquiera que abre el repo las ve. Debería abrir el repo las ve. Debería leerlas de variables de entorno sin default.</div>
         <div class="bug-pasos">
           <strong>📋 Pasos para arreglarlo:</strong>
           <ol>
@@ -353,7 +353,7 @@ if not DB_PASSWORD or not API_KEY:
         <span class="bug-dificultad alta">Alto</span>
         <h3 class="bug-titulo">Token que no expira</h3>
         <p>En <code>app.py</code>, sistema de tokens (si existe).</p>
-        <div class="bug-pista">💡 <b>Pista</b>: el token se genera una vez y sirve para siempre. Si te lo roban, no hay forma de invalidarlo.</p>
+        <div class="bug-pista">💡 <b>Pista</b>: el token se genera una vez y sirve para siempre. Si te lo roban, no hay forma de invalidarlo.</div>
         <div class="bug-pasos">
           <strong>📋 Pasos para arreglarlo:</strong>
           <ol>
@@ -379,7 +379,7 @@ if not DB_PASSWORD or not API_KEY:
         <span class="bug-dificultad baja">Fácil</span>
         <h3 class="bug-titulo">Stack trace visible en errores</h3>
         <p>En <code>app.py</code>, default exception handler.</p>
-        <div class="bug-pista">💡 <b>Pista</b>: cuando algo tira error 500, el server muestra TODO el stack trace. Eso le dice al atacante dónde está el código y qué libs usás.</p>
+        <div class="bug-pista">💡 <b>Pista</b>: cuando algo tira error 500, el server muestra TODO el stack trace. Eso le dice al atacante dónde está el código y qué libs usás.</div>
         <div class="bug-probar">
           <strong>🧪 Probalo vos</strong> (romper el server con un endpoint que no existe):
           <a href="/api/v1/endpoint_que_no_existe_xyz" target="_blank" class="bug-link-archivo" style="display:inline-block; margin-top:0.3rem; padding:0.4rem 0.8rem; background:var(--accent,#1877f2); color:white; border-radius:4px; text-decoration:none;">▶️ Abrir endpoint que no existe (rompe 500)</a>
@@ -404,7 +404,7 @@ return JSONResponse(status_code=500, content={"error": "Error interno del servid
         <span class="bug-dificultad media">Medio</span>
         <h3 class="bug-titulo">Endpoint /debug que filtra config</h3>
         <p>En <code>app.py</code>, el endpoint <code>/api/v1/debug</code>.</p>
-        <div class="bug-pista">💡 <b>Pista</b>: el endpoint <code>/api/v1/debug</code> está accesible sin auth y devuelve variables de entorno sensibles. Solo accesible si DEV_MODE está activado.</p>
+        <div class="bug-pista">💡 <b>Pista</b>: el endpoint <code>/api/v1/debug</code> está accesible sin auth y devuelve variables de entorno sensibles. Solo accesible si DEV_MODE está activado.</div>
         <div class="bug-pasos">
           <strong>📋 Pasos para arreglarlo:</strong>
           <ol>

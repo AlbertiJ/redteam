@@ -342,19 +342,16 @@
   }
 
   // ==================== SECCIÓN EN EL CUERPO ====================
+  // NOTA: Con layout 2 columnas, las Notas viven SIEMPRE en la sidebar derecha.
+  // No se renderiza nada en el cuerpo (evita duplicación).
   function ensureContenedorCuerpo() {
+    // Devolver un div oculto que nunca se muestra
     let cont = document.getElementById('nota-seccion-cuerpo');
     if (cont) return cont;
     cont = document.createElement('div');
     cont.id = 'nota-seccion-cuerpo';
-    cont.className = 'nota-seccion-cuerpo oculto';
-    // Insertar al final del <main> o al principio del body
-    const main = document.querySelector('main');
-    if (main) {
-      main.appendChild(cont);
-    } else {
-      document.body.appendChild(cont);
-    }
+    cont.style.display = 'none';
+    document.body.appendChild(cont);
     return cont;
   }
 

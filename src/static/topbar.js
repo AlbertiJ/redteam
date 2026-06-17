@@ -58,7 +58,22 @@
 
   function aplicarFuente(size) {
     const sizes = { 'A-': '13px', 'A': '15px', 'A+': '17px', 'A++': '19px' };
-    document.documentElement.style.setProperty('--font-size-base', sizes[size] || '15px');
+    const px = sizes[size] || '15px';
+    document.body.style.fontSize = px;
+    document.documentElement.style.setProperty('--rt-font-size', px);
+    document.documentElement.setAttribute('data-font-size', size);
+  }
+
+  function aplicarTipografia(tipo) {
+    const fonts = {
+      'sans': '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif',
+      'mono': '"JetBrains Mono", "SF Mono", Monaco, Consolas, monospace',
+      'dyslexic': '"OpenDyslexic", "Comic Sans MS", sans-serif'
+    };
+    const f = fonts[tipo] || fonts.sans;
+    document.body.style.fontFamily = f;
+    document.documentElement.style.setProperty('--rt-font-family', f);
+    document.documentElement.setAttribute('data-tipografia', tipo);
   }
 
   function buildBar() {
@@ -72,8 +87,6 @@
     const brillo = getBrillo();
 
     bar.innerHTML = `
-      <button class="tour-btn" id="rtTopbarTour">❓ Iniciar tour</button>
-      <div class="sep"></div>
       <div class="grp">
         <label>Modo</label>
         <div class="toggle-grp" id="rtTopbarModo">
@@ -126,14 +139,10 @@
     aplicarColor((COLORS.find(c => c.name === getTema()) || COLORS[0]).hex);
     aplicarBrillo(getBrillo());
     aplicarFuente(getFuente());
+    aplicarTipografia(localStorage.getItem('rt_tipografia') || 'sans');
 
     // === Handlers ===
-    document.getElementById('rtTopbarTour').onclick = () => {
-      // El tour ya existe, lo dispara tour.js si está
-      const tourBtn = document.getElementById('startTour');
-      if (tourBtn) tourBtn.click();
-      else alert('Tour guiado: en construcción. Te mostrará cada sección de la app paso a paso.');
-    };
+    // El tour está en el header de cada HTML (botón Tour). No lo duplicamos en la topbar.
 
     // Modo
     document.querySelectorAll('#rtTopbarModo button').forEach(btn => {
@@ -181,8 +190,13 @@
 
     // Tipografía
     const tipoSelect = document.getElementById('rtTopbarTipografia');
+    // Cargar valor guardado
+    const tipoGuardado = localStorage.getItem('rt_tipografia') || 'sans';
+    tipoSelect.value = tipoGuardado;
+    aplicarTipografia(tipoGuardado);
     tipoSelect.onchange = () => {
       const t = tipoSelect.value;
+      aplicarTipografia(t);
       localStorage.setItem('rt_tipografia', t);
     };
   }

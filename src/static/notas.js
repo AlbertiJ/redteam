@@ -443,11 +443,7 @@
       wrap.className = 'notas-contenedor';
       // Mover el h4 + textarea + acciones adentro del wrap
       while (notesPanel.firstChild) wrap.appendChild(notesPanel.firstChild);
-      // Agregar panel Apariencia AL PRINCIPIO del wrap
-      const apWrap = document.createElement('div');
-      apWrap.className = 'apariencia-wrap';
-      renderPanelApariencia(apWrap);
-      wrap.insertBefore(apWrap, wrap.firstChild);
+      // NOTA: Panel Apariencia ahora vive en la topbar (topbar.js). No se renderiza aquí.
       // Agregar separador y menú de notas DESPUÉS del h4
       const sep = document.createElement('hr');
       sep.className = 'notas-separador';

@@ -356,16 +356,18 @@
   }
 
   // ==================== SECCIÓN EN EL CUERPO ====================
-  // Renderiza la sección seleccionada (Historial, Favoritas, etc.) en un contenedor del cuerpo.
+  // Renderiza la sección seleccionada (Historial, Favoritas, etc.) en un contenedor
+  // que va DESPUÉS del .rt-layout, no adentro del main. Esto evita que los bug-cards
+  // del Detective crezcan cuando se abre una sección.
   function ensureContenedorCuerpo() {
     let cont = document.getElementById('nota-seccion-cuerpo');
     if (cont) return cont;
     cont = document.createElement('div');
     cont.id = 'nota-seccion-cuerpo';
     cont.className = 'nota-seccion-cuerpo';
-    const main = document.querySelector('main');
-    if (main) {
-      main.appendChild(cont);
+    const layout = document.querySelector('.rt-layout');
+    if (layout && layout.parentNode) {
+      layout.parentNode.insertBefore(cont, layout.nextSibling);
     } else {
       document.body.appendChild(cont);
     }

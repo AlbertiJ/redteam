@@ -11,6 +11,8 @@
   const KEY_DETECTIVE = 'redteam-detective-resueltos';
   const KEY_CUSTOM_DBS = 'redteam-custom-dbs';
   const KEY_NOTAS = 'redteam-notas';
+  const KEY_FAVORITAS = 'redteam-notas-favoritas';
+  const KEY_HISTORIAL = 'redteam-notas-historial';
 
   const BUGS = [
     {id: '1a', nombre: '1A · URL duplicada', grupo: 'URLs'},
@@ -284,6 +286,20 @@
     return localStorage.getItem(KEY_NOTAS) || '';
   }
 
+  // Guarda snapshot de la nota en el historial (max 30)
+  function guardarEnHistorial(texto) {
+    if (!texto || !texto.trim()) return;
+    let historial = [];
+    try { historial = JSON.parse(localStorage.getItem(KEY_HISTORIAL) || '[]'); } catch (e) { historial = []; }
+    historial.unshift({
+      texto: texto,
+      fecha: new Date().toISOString(),
+      preview: texto.slice(0, 80)
+    });
+    if (historial.length > 30) historial = historial.slice(0, 30);
+    localStorage.setItem(KEY_HISTORIAL, JSON.stringify(historial));
+  }
+
   // ==================== EXPORTAR NOTAS ====================
   function exportarTXT() {
     const nota = getNota();
@@ -403,12 +419,12 @@ ${nota || '(vacío)'}
       <h4 class="sidebar-title notes-header" data-toggle="notes">
         📝 Cuaderno <span class="toggle-icon">▶</span>
       </h4>
-      <textarea id="sidebarNotas" placeholder="Anotá lo que quieras... se guarda solo. Exportá a PDF o TXT cuando termines.">${getNota().replace(/</g, '&lt;')}</textarea>
+      <textarea id="sidebarNotas" placeholder="Anotá lo que quieras... se guarda solo.">${getNota().replace(/</g, '&lt;')}</textarea>
       <div class="save-status" id="notasStatus"></div>
       <div class="acciones">
-        <button id="btnExportTXT">📄 TXT</button>
-        <button id="btnExportPDF">🖨️ PDF</button>
+        <button id="btnGuardarNotas">💾 Guardar</button>
         <button id="btnLimpiarNotas">🗑️ Limpiar</button>
+        <button id="btnMarcarFavorita">⭐ Favorita</button>
       </div>
     `;
     document.body.appendChild(notes);
@@ -428,9 +444,39 @@ ${nota || '(vacío)'}
       }, 500);
     });
 
-    // Botones de exportación
-    document.getElementById('btnExportTXT').onclick = exportarTXT;
-    document.getElementById('btnExportPDF').onclick = exportarPDF;
+    // === Guardar manual: persiste localStorage y snapshot al historial ===
+    document.getElementById('btnGuardarNotas').onclick = () => {
+      localStorage.setItem(KEY_NOTAS, ta.value);
+      guardarEnHistorial(ta.value);
+      status.textContent = '✅ Guardado';
+      setTimeout(() => { status.textContent = ''; }, 1500);
+    };
+
+    // === Favorita: guardar el contenido actual en la lista de favoritas ===
+    document.getElementById('btnMarcarFavorita').onclick = () => {
+      const texto = ta.value.trim();
+      if (!texto) {
+        status.textContent = '⚠️ Escribí algo antes';
+        setTimeout(() => { status.textContent = ''; }, 1500);
+        return;
+      }
+      let favoritas = [];
+      try { favoritas = JSON.parse(localStorage.getItem(KEY_FAVORITAS) || '[]'); } catch (e) { favoritas = []; }
+      favoritas.unshift({
+        texto: texto,
+        fecha: new Date().toISOString(),
+        preview: texto.slice(0, 80)
+      });
+      // Limitar a 20 favoritas
+      if (favoritas.length > 20) favoritas = favoritas.slice(0, 20);
+      localStorage.setItem(KEY_FAVORITAS, JSON.stringify(favoritas));
+      // También guardar en historial (auto-save)
+      guardarEnHistorial(texto);
+      status.textContent = '⭐ Guardado como favorita';
+      setTimeout(() => { status.textContent = ''; }, 2000);
+    };
+
+    // Botones
     document.getElementById('btnLimpiarNotas').onclick = () => {
       if (confirm('¿Borrar todas las notas?')) {
         ta.value = '';

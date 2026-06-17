@@ -465,7 +465,7 @@ ${nota || '(vacío)'}
     notes.id = 'notesPanel';
     notes.innerHTML = `
       <h4 class="sidebar-title notes-header" data-toggle="notes">
-        📝 Tus notas <span class="toggle-icon">▶</span>
+        📝 Cuaderno <span class="toggle-icon">▶</span>
       </h4>
       <textarea id="sidebarNotas" placeholder="Anotá lo que quieras... se guarda solo. Exportá a PDF o TXT cuando termines.">${getNota().replace(/</g, '&lt;')}</textarea>
       <div class="save-status" id="notasStatus"></div>

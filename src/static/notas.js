@@ -131,9 +131,12 @@
             try { items = JSON.parse(localStorage.getItem('redteam-notas-favoritas') || '[]'); } catch (e) { items = []; }
             items.splice(idx, 1);
             localStorage.setItem('redteam-notas-favoritas', JSON.stringify(items));
-            // Re-render
+            // Re-render y actualizar badges
             const cont = document.getElementById('nota-seccion-cuerpo');
             if (cont && typeof abrirSeccion === 'function') abrirSeccion('favoritas', null);
+            if (window.RedTeamNotas && window.RedTeamNotas.actualizarBadges) {
+              window.RedTeamNotas.actualizarBadges();
+            }
           };
         });
       }
@@ -322,7 +325,30 @@
   }
 
   // ==================== MENÚ DE NOTAS ====================
+  // Referencia al menú (para actualizar badges en vivo)
+  let menuNotasRef = null;
+
+  // Función pública: actualizar los contadores del menú desde localStorage
+  function actualizarBadgesMenu() {
+    if (!menuNotasRef) return;
+    let nHistorial = 0;
+    let nFavoritas = 0;
+    try { nHistorial = JSON.parse(localStorage.getItem('redteam-notas-historial') || '[]').length; } catch (e) {}
+    try { nFavoritas = JSON.parse(localStorage.getItem('redteam-notas-favoritas') || '[]').length; } catch (e) {}
+    const badges = menuNotasRef.querySelectorAll('.menu-nota-item .menu-nota-badge');
+    if (badges[0]) badges[0].textContent = nHistorial;
+    if (badges[1]) badges[1].textContent = nFavoritas;
+  }
+  window.RedTeamNotas = window.RedTeamNotas || {};
+  window.RedTeamNotas.actualizarBadges = actualizarBadgesMenu;
+
   function renderMenuNotas(host) {
+    // Calcular contadores reales desde localStorage
+    let nHistorial = 0;
+    let nFavoritas = 0;
+    try { nHistorial = JSON.parse(localStorage.getItem('redteam-notas-historial') || '[]').length; } catch (e) {}
+    try { nFavoritas = JSON.parse(localStorage.getItem('redteam-notas-favoritas') || '[]').length; } catch (e) {}
+
     const menu = document.createElement('ul');
     menu.className = 'menu-notas';
     menu.innerHTML = `
@@ -333,11 +359,12 @@
       <li><button class="menu-nota-item" data-seccion="historial">
         <span class="menu-nota-icono">📚</span>
         <span class="menu-nota-label">Historial</span>
-        <span class="menu-nota-badge">4</span>
+        <span class="menu-nota-badge">${nHistorial}</span>
       </button></li>
       <li><button class="menu-nota-item" data-seccion="favoritas">
         <span class="menu-nota-icono">⭐</span>
         <span class="menu-nota-label">Favoritas</span>
+        <span class="menu-nota-badge">${nFavoritas}</span>
       </button></li>
       <li><button class="menu-nota-item" data-seccion="exportar">
         <span class="menu-nota-icono">📤</span>
@@ -349,6 +376,11 @@
       </button></li>
     `;
     host.appendChild(menu);
+
+    // Guardar referencia para actualizar badges en vivo
+    menuNotasRef = menu;
+    // Forzar refresh inicial por si las notas cambiaron entre la carga y este punto
+    actualizarBadgesMenu();
 
     menu.querySelectorAll('.menu-nota-item').forEach(btn => {
       btn.onclick = () => abrirSeccion(btn.dataset.seccion, btn);

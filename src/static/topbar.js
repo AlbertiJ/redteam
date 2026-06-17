@@ -28,7 +28,7 @@
     try { return localStorage.getItem(KEY_TEMA) || 'azul'; } catch (e) { return 'azul'; }
   }
   function getModo() {
-    try { return localStorage.getItem(KEY_MODO) || 'claro'; } catch (e) { return 'claro'; }
+    return 'claro';
   }
   function getFuente() {
     try { return localStorage.getItem(KEY_FUENTE) || 'A'; } catch (e) { return 'A'; }
@@ -88,14 +88,6 @@
 
     bar.innerHTML = `
       <div class="grp">
-        <label>Modo</label>
-        <div class="toggle-grp" id="rtTopbarModo">
-          <button data-modo="claro" class="${modo === 'claro' ? 'activo' : ''}">☀️</button>
-          <button data-modo="oscuro" class="${modo === 'oscuro' ? 'activo' : ''}">🌙</button>
-        </div>
-      </div>
-      <div class="sep"></div>
-      <div class="grp">
         <label>Color</label>
         <div class="color-row" id="rtTopbarColores">
           ${COLORS.map(c => `<div class="color-dot ${c.name === tema ? 'activo' : ''}" data-color="${c.name}" data-hex="${c.hex}" style="background:${c.hex}" title="${c.name}"></div>`).join('')}
@@ -142,20 +134,8 @@
     aplicarTipografia(localStorage.getItem('rt_tipografia') || 'sans');
 
     // === Handlers ===
-    // El tour está en el header de cada HTML (botón Tour). No lo duplicamos en la topbar.
-
-    // Modo
-    document.querySelectorAll('#rtTopbarModo button').forEach(btn => {
-      btn.onclick = () => {
-        const m = btn.dataset.modo;
-        if (T.setModo) T.setModo(m);
-        else {
-          document.documentElement.setAttribute('data-modo', m);
-          localStorage.setItem(KEY_MODO, m);
-        }
-        document.querySelectorAll('#rtTopbarModo button').forEach(b => b.classList.toggle('activo', b === btn));
-      };
-    });
+    // Modo oscuro desactivado: siempre claro
+    document.documentElement.setAttribute('data-modo', 'claro');
 
     // Color
     document.querySelectorAll('#rtTopbarColores .color-dot').forEach(dot => {

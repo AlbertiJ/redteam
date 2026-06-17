@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/static/style-colors.css">
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="/static/notas.css">
+  <link rel="stylesheet" href="/static/topbar.css">
   <style>
     /* Detective: estilo específico */
     .bug-card {
@@ -40,8 +41,10 @@
       font-weight: 600;
     }
     .bug-dificultad.baja { background: #d8f5d8; color: #2a6a2a; }
+    [data-modo="oscuro"] .bug-dificultad.baja { background: #064e3b; color: #6ee7b7; }
     .bug-dificultad.media { background: var(--bg-soft, #f7f8fa); color: var(--text-main, #1c1e21); }
     .bug-dificultad.alta { background: #ffe0d0; color: #8a2a00; }
+    [data-modo="oscuro"] .bug-dificultad.alta { background: #7c2d12; color: #fed7aa; }
     .bug-titulo { margin: 0.5rem 0 0.3rem 0; color: var(--text-main, #1c1e21); font-size: 1.05rem; }
     .bug-pista {
       background: #fff4e5;
@@ -115,6 +118,7 @@
   <script src="/static/sidebar.js"></script>
   <script src="/static/auth.js"></script>
   <script src="/static/notas.js"></script>
+  <script src="/static/topbar.js"></script>
 </head>
 <body data-brightness="100">
   <div class="brightness-bar" id="brightnessBar" style="display:none;">

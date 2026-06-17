@@ -72,7 +72,7 @@
         padding: 1.5rem 2rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       }
-      .rt-layout > main { position: relative; }
+      .rt-layout > main { position: relative; width: 100%; }
       .sidebar, .notes-panel {
         position: static;
         width: auto;
@@ -87,61 +87,47 @@
         font-family: var(--font-family-base, sans-serif);
         font-size: 0.88rem;
       }
-      /* === Sidebar IZQ como franja horizontal ABAJO del cuerpo (layout 2 col) === */
-      .sidebar {
+      /* === SLIMBAR: franja inferior compacta (Avance + Atajos en 2 columnas) === */
+      .sidebar.slimbar {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 1.5rem;
+        grid-template-columns: auto 1fr;
+        gap: 2rem;
         max-height: none;
         margin-top: 1rem;
+        padding: 0.8rem 1.2rem !important;
+        align-items: center;
+        /* Forzar a ocupar todo el ancho del grid, abajo */
+        grid-column: 1 / -1;
       }
-      .sidebar .sidebar-section { margin-bottom: 0; }
-      .sidebar-section { margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border-soft, #f0f2f5); }
-      .sidebar-section:last-child { border-bottom: none; margin-bottom: 0; }
-      .sidebar h4 {
+      .slimbar-grupo h4 {
         color: var(--accent, #1877f2);
-        font-size: 0.85rem;
+        font-size: 0.72rem;
         text-transform: uppercase;
         font-weight: 700;
-        margin: 0 0 0.5rem 0;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
+        margin: 0 0 0.4rem 0;
       }
-      .sidebar-stat {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 0.3rem 0;
-        color: var(--text-main, #1c1e21);
+      .slimbar-stats { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+      .slimbar-stat {
+        display: flex; flex-direction: column; align-items: flex-start;
+        font-size: 0.78rem; color: var(--text-soft, #65676b);
+        line-height: 1.3;
       }
-      .sidebar-stat .label { color: var(--text-muted, #65676b); font-size: 0.85rem; }
-      .sidebar-stat .value {
-        background: var(--accent, #1877f2);
-        color: white;
-        font-size: 0.78rem;
-        font-weight: 700;
-        padding: 1px 8px;
-        border-radius: 10px;
-      }
-      .sidebar-bugs { list-style: none; padding: 0; margin: 0; }
-      .sidebar-bugs li {
-        display: block;
-        padding: 0.35rem 0.4rem;
-        font-size: 0.82rem;
-        color: var(--text-muted, #65676b);
-        cursor: pointer;
+      .slimbar-stat b { color: var(--text-main, #1c1e21); font-size: 0.95rem; font-weight: 700; }
+      .slimbar-stat b.ok { color: var(--color-exito, #10b981); }
+      .slimbar-atajos { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      .slimbar-atajos a {
+        color: var(--text-soft, #65676b);
+        text-decoration: none;
+        padding: 0.25rem 0.6rem;
         border-radius: 4px;
-        transition: background 0.15s;
+        background: var(--bg-soft, #f7f8fa);
+        font-size: 0.78rem;
+        transition: background 0.15s, color 0.15s;
       }
-      .sidebar-bugs li:hover {
-        background: var(--accent-soft, #e7f3ff);
-        color: var(--accent, #1877f2);
-      }
-      .sidebar-bugs li.resuelto {
-        color: var(--color-exito, #10b981);
-        text-decoration: line-through;
-        opacity: 0.7;
-      }
-      .sidebar-bugs li .check { margin-right: 0.3rem; }
+      .slimbar-atajos a:hover { background: var(--accent-soft, rgba(24,119,242,0.1)); color: var(--accent, #1877f2); }
+      [data-modo="oscuro"] .slimbar-atajos a:hover { background: rgba(255,255,255,0.08); color: var(--accent); }
+      .sidebar-section { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
 
       /* Panel derecho de notas */
       .notes-panel {
@@ -375,89 +361,39 @@ ${nota || '(vacío)'}
     if (document.getElementById('sidebar')) {
       return;
     }
-    // === SIDEBAR IZQUIERDO: solo avance + Detective ===
+    // === SLIMBAR INFERIOR: avance + atajos (compacto) ===
     const sidebar = document.createElement('aside');
-    sidebar.className = 'sidebar';
+    sidebar.className = 'sidebar slimbar';
     sidebar.id = 'sidebar';
     sidebar.innerHTML = `
-      <div class="sidebar-section sidebar-header" data-toggle="sidebar">
-        <h4 class="sidebar-title">📊 Tu avance <span class="toggle-icon">◀</span></h4>
-        <div class="sidebar-stat">
-          <span class="label">🐛 Detective</span>
-          <span class="value">${resueltos.length}/10</span>
-        </div>
-        <div class="sidebar-stat">
-          <span class="label">💾 DBs custom</span>
-          <span class="value">${customs.length}/3</span>
-        </div>
-        <div class="sidebar-stat">
-          <span class="label">🧪 Tests</span>
-          <span class="value">22 ✅</span>
+      <div class="slimbar-grupo">
+        <h4>📊 Avance</h4>
+        <div class="slimbar-stats">
+          <div class="slimbar-stat"><span>🐛 Detective</span><b>${resueltos.length}/10</b></div>
+          <div class="slimbar-stat"><span>💾 DBs</span><b>${customs.length}/3</b></div>
+          <div class="slimbar-stat"><span>🧪 Tests</span><b class="ok">22 ✅</b></div>
         </div>
       </div>
-
-      <div class="sidebar-section">
-        <h4>🪲 Detective (click → bug)</h4>
-        <ul class="sidebar-bugs">
-          ${BUGS.map(b => `
-            <li class="sidebar-bug-link ${resueltos.includes(b.id) ? 'resuelto' : ''}" data-bug="${b.id}">
-              <span class="check">${resueltos.includes(b.id) ? '✅' : '⬜'}</span>
-              ${b.nombre}
-            </li>
-          `).join('')}
-        </ul>
-      </div>
-
-      <div class="sidebar-section">
+      <div class="slimbar-grupo">
         <h4>🔗 Atajos</h4>
-        <div class="sidebar-stat"><a href="/static/practicas.html" style="color:var(--accent);text-decoration:none;">🎵 Práctica</a></div>
-        <div class="sidebar-stat"><a href="/static/detective.html" style="color:var(--accent);text-decoration:none;">🪲 Detective</a></div>
-        <div class="sidebar-stat"><a href="/static/dbbuilder.html" style="color:var(--accent);text-decoration:none;">🗄️ DB Builder</a></div>
-        <div class="sidebar-stat"><a href="/static/wizard.html" style="color:var(--accent);text-decoration:none;">📋 Cargar DB</a></div>
+        <div class="slimbar-atajos">
+          <a href="/static/practicas.html">🎵 Práctica</a>
+          <a href="/static/detective.html">🪲 Detective</a>
+          <a href="/static/dbbuilder.html">💾 DB Builder</a>
+          <a href="/static/wizard.html">📋 Cargar DB</a>
+          <a href="/static/ranking.html">📊 Ranking</a>
+          <a href="/static/historial.html">🏆 Historial</a>
+        </div>
       </div>
     `;
     document.body.classList.add('sidebar-on');
     // Insertar el sidebar IZQ como hermano del <main> (en el body).
     // notas.js lo va a mover adentro del .rt-layout cuando arme el grid.
-    // Por ahora lo metemos al body para que exista en el DOM.
     document.body.appendChild(sidebar);
 
-    // Hacer las cards del Detective scrolleables al bug
-    sidebar.querySelectorAll('.sidebar-bug-link').forEach(li => {
-      li.onclick = () => {
-        const bugId = li.dataset.bug;
-        irAlBug(bugId);
-      };
-    });
-
-    // === TOGGLE del sidebar IZQ ===
-    // 1) Click en el header h4 → colapsa/expande
-    const headerIzq = sidebar.querySelector('[data-toggle="sidebar"]');
-    const toggleIzqIcon = sidebar.querySelector('.toggle-icon');
-    if (headerIzq) {
-      headerIzq.style.cursor = 'pointer';
-      headerIzq.onclick = () => {
-        const collapsed = sidebar.classList.toggle('collapsed');
-        document.body.classList.toggle('sidebar-collapsed-izq', collapsed);
-        if (toggleIzqIcon) {
-          toggleIzqIcon.textContent = collapsed ? '▶' : '◀';
-        }
-      };
-    }
-    // 2) Botón flotante 📊 que aparece cuando la sidebar está colapsada
-    const toggleIzq = document.createElement('button');
-    toggleIzq.className = 'sidebar-toggle';
-    toggleIzq.id = 'sidebarToggle';
-    toggleIzq.textContent = '📊';
-    toggleIzq.title = 'Mostrar/ocultar panel izquierdo';
-    toggleIzq.onclick = () => {
-      const collapsed = sidebar.classList.toggle('collapsed');
-      document.body.classList.toggle('sidebar-collapsed-izq', collapsed);
-      if (toggleIzqIcon) {
-        toggleIzqIcon.textContent = collapsed ? '▶' : '◀';
-      }
-    };
-    document.body.appendChild(toggleIzq);
+    // NOTA: La lista de bugs del Detective ya no se renderiza en la slimbar
+    // (estaba duplicando info con el cuerpo del Detective). El slimbar solo
+    // muestra Avance + Atajos.
 
     // === PANEL DERECHO: NOTAS ===
     const notes = document.createElement('aside');

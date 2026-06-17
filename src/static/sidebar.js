@@ -450,6 +450,9 @@ ${nota || '(vacío)'}
       guardarEnHistorial(ta.value);
       status.textContent = '✅ Guardado';
       setTimeout(() => { status.textContent = ''; }, 1500);
+      if (window.RedTeamNotas && window.RedTeamNotas.actualizarBadges) {
+        window.RedTeamNotas.actualizarBadges();
+      }
     };
 
     // === Favorita: guardar el contenido actual en la lista de favoritas ===
@@ -474,6 +477,9 @@ ${nota || '(vacío)'}
       guardarEnHistorial(texto);
       status.textContent = '⭐ Guardado como favorita';
       setTimeout(() => { status.textContent = ''; }, 2000);
+      if (window.RedTeamNotas && window.RedTeamNotas.actualizarBadges) {
+        window.RedTeamNotas.actualizarBadges();
+      }
     };
 
     // Botones

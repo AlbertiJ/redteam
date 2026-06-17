@@ -398,27 +398,28 @@
     const notesPanel = document.querySelector('.notes-panel');
     const sidebarIzq = document.querySelector('.sidebar');
     const main = document.querySelector('main');
-    if (!notesPanel || !sidebarIzq || !main) {
+    if (!notesPanel || !main) {
       // Si sidebar.js no creó los elementos, reintentar en 500ms
       setTimeout(init, 500);
       return;
     }
 
-    // === CREAR WRAPPER DE 3 COLUMNAS (acoplar al diseño) ===
+    // === CREAR WRAPPER DE 2 COLUMNAS (cuerpo + notas; sidebar IZQ abajo como franja) ===
     if (!document.querySelector('.rt-layout')) {
       // Crear wrapper
       const wrapper = document.createElement('div');
       wrapper.className = 'rt-layout';
-      // Mover los 3 elementos adentro en orden: IZQ → MAIN → DER
-      // 1. Mover la sidebar IZQ
-      sidebarIzq.remove();
-      wrapper.appendChild(sidebarIzq);
-      // 2. El main ya está donde está, lo movemos adentro
+      // 1. Mover el main adentro (cuerpo)
       main.remove();
       wrapper.appendChild(main);
-      // 3. Mover la sidebar DER
+      // 2. Mover la sidebar DER (notas)
       notesPanel.remove();
       wrapper.appendChild(notesPanel);
+      // 3. La sidebar IZQ va al FINAL, ocupa todo el ancho (span 2)
+      if (sidebarIzq) {
+        sidebarIzq.remove();
+        wrapper.appendChild(sidebarIzq);
+      }
       // Insertar el wrapper después de la navbar
       const navbar = document.querySelector('header') || document.querySelector('nav');
       if (navbar && navbar.parentNode) {

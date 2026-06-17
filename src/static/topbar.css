@@ -1,0 +1,137 @@
+/* RedTeam Lab v4 — Barra superior de Apariencia (topbar.css) */
+:root {
+  --topbar-bg: #0f172a;
+  --topbar-fg: #cbd5e1;
+  --topbar-fg-soft: #94a3b8;
+  --topbar-border: #1e293b;
+  --topbar-hover: rgba(255, 255, 255, 0.08);
+  --topbar-accent: #1877f2;
+  --topbar-tour-bg: rgba(245, 158, 11, 0.15);
+  --topbar-tour-fg: #fbbf24;
+  --topbar-tour-border: rgba(245, 158, 11, 0.3);
+}
+[data-modo="oscuro"] {
+  --topbar-bg: #0a0a0a;
+  --topbar-border: #2a2a2a;
+}
+
+.rt-topbar {
+  background: var(--topbar-bg);
+  color: var(--topbar-fg);
+  padding: 0.5rem 1.2rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.82rem;
+  border-bottom: 1px solid var(--topbar-border);
+  font-family: var(--font-family-base, sans-serif);
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.rt-topbar .sep {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 0.3rem;
+}
+
+.rt-topbar label {
+  font-size: 0.7rem;
+  color: var(--topbar-fg-soft);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.rt-topbar .grp {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.rt-topbar .toggle-grp {
+  display: flex;
+  background: var(--topbar-hover);
+  border-radius: 5px;
+  padding: 2px;
+}
+
+.rt-topbar .toggle-grp button {
+  background: transparent;
+  border: none;
+  color: var(--topbar-fg);
+  padding: 0.25rem 0.55rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-family: inherit;
+}
+
+.rt-topbar .toggle-grp button:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.rt-topbar .toggle-grp button.activo {
+  background: var(--topbar-accent);
+  color: white;
+}
+
+.rt-topbar .color-row {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.rt-topbar .color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.rt-topbar .color-dot:hover { transform: scale(1.1); }
+.rt-topbar .color-dot.activo { border-color: white; }
+
+.rt-topbar .brightness {
+  width: 100px;
+  accent-color: var(--topbar-accent);
+}
+
+.rt-topbar select {
+  background: var(--topbar-hover);
+  color: var(--topbar-fg);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.3rem 0.5rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.rt-topbar .tour-btn {
+  background: var(--topbar-tour-bg);
+  color: var(--topbar-tour-fg);
+  border: 1px solid var(--topbar-tour-border);
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.rt-topbar .tour-btn:hover {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+.rt-topbar .spacer { flex: 1; }
+
+@media (max-width: 900px) {
+  .rt-topbar { font-size: 0.78rem; padding: 0.4rem 0.7rem; }
+  .rt-topbar .brightness { width: 70px; }
+  .rt-topbar .spacer { display: none; }
+}

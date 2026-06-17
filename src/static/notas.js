@@ -23,106 +23,120 @@
       icono: '📝',
       titulo: 'Notas rápidas',
       html: function () {
+        // El editor real vive en la sidebar del cuaderno. Acá mostramos una vista
+        // resumen + atajo para abrir la sección del cuerpo si lo necesita.
+        const ta = document.getElementById('sidebarNotas');
+        const texto = ta ? ta.value : localStorage.getItem('redteam-notas') || '';
+        const preview = texto.slice(0, 300) || 'Sin notas todavía. Escribí en la sidebar de la derecha.';
         return `
-          <div class="nota-editor">
-            <textarea id="nota-texto" placeholder="Anotá lo que quieras... se guarda solo. Exportá a PDF o TXT cuando termines.">${getNota().replace(/</g, '&lt;')}</textarea>
-            <div class="nota-botones">
-              <button id="btn-guardar-nota" class="btn-accion">💾 Guardar</button>
-              <button id="btn-favorita-nota" class="btn-accion secundario">⭐ Marcar favorita</button>
-              <button id="btn-limpiar-nota" class="btn-accion secundario">🗑️ Borrar</button>
+          <div class="nota-vista-rapida">
+            <p>✏️ <b>El editor de notas está en la sidebar derecha</b> (botón 📝 Cuaderno). Escribí ahí y se guarda solo.</p>
+            <div class="nota-preview">
+              <h4>Vista previa de lo que tenés:</h4>
+              <pre>${preview.replace(/</g, '&lt;')}${texto.length > 300 ? '...' : ''}</pre>
             </div>
-            <div class="nota-status" id="nota-status"></div>
+            <p class="nota-ayuda">💡 Tip: usá los botones <b>💾 Guardar</b>, <b>⭐ Favorita</b> y <b>🗑️ Limpiar</b> de la sidebar para gestionar tus notas.</p>
           </div>
         `;
       },
       onMount: function () {
-        const ta = $('#nota-texto');
-        const status = $('#nota-status');
-        let saveTimer;
-        if (ta) {
-          ta.addEventListener('input', () => {
-            clearTimeout(saveTimer);
-            status.textContent = 'Guardando...';
-            saveTimer = setTimeout(() => {
-              localStorage.setItem('redteam-notas', ta.value);
-              status.textContent = '✅ Guardado';
-              setTimeout(() => { status.textContent = ''; }, 1500);
-            }, 500);
-          });
-        }
-        if ($('#btn-guardar-nota')) {
-          $('#btn-guardar-nota').onclick = () => {
-            localStorage.setItem('redteam-notas', ta.value);
-            status.textContent = '✅ Guardado';
-            setTimeout(() => { status.textContent = ''; }, 1500);
-          };
-        }
-        if ($('#btn-favorita-nota')) {
-          $('#btn-favorita-nota').onclick = () => {
-            status.textContent = '⭐ Marcada como favorita';
-            setTimeout(() => { status.textContent = ''; }, 1500);
-          };
-        }
-        if ($('#btn-limpiar-nota')) {
-          $('#btn-limpiar-nota').onclick = () => {
-            if (confirm('¿Borrar la nota actual?')) {
-              ta.value = '';
-              localStorage.setItem('redteam-notas', '');
-              status.textContent = '🗑️ Borrado';
-              setTimeout(() => { status.textContent = ''; }, 1500);
-            }
-          };
-        }
+        // Nada que montar; el editor está en la sidebar
       },
     },
     historial: {
       icono: '📚',
       titulo: 'Historial de notas',
       html: function () {
-        // Por ahora notas placeholder. Cuando se implemente persistencia de versiones, se cargan acá.
-        const items = [
-          {fecha: '2026-06-15 14:22', texto: 'El Detective tiene 10 bugs. El 2A es input vacío, el 3A es SQLi.'},
-          {fecha: '2026-06-15 10:11', texto: 'Probé el DB Builder. Anda bien con 3 campos. Tarda ~2s en crear.'},
-          {fecha: '2026-06-14 18:30', texto: 'El wizard de cargar DB tiene 1 paso. Es simple pero confunde al principio.'},
-          {fecha: '2026-06-13 22:15', texto: 'El cambio de color ahora también tiene modo oscuro, mucho mejor.'},
-        ];
+        let items = [];
+        try { items = JSON.parse(localStorage.getItem('redteam-notas-historial') || '[]'); } catch (e) { items = []; }
+        if (items.length === 0) {
+          return '<div class="nota-vacio">📭 Sin historial todavía. Hacé click en 💾 Guardar o ⭐ Favorita en el cuaderno.</div>';
+        }
         return `
           <div class="nota-lista">
-            ${items.map(item => `
-              <div class="nota-item">
-                <div class="nota-item-fecha">${item.fecha}</div>
-                <div class="nota-item-texto">${item.texto}</div>
+            ${items.map((item, i) => `
+              <div class="nota-item" data-historial-idx="${i}">
+                <div class="nota-item-fecha">${new Date(item.fecha).toLocaleString('es-AR')}</div>
+                <div class="nota-item-texto">${item.texto.slice(0, 200).replace(/</g, '&lt;')}${item.texto.length > 200 ? '...' : ''}</div>
+                <button class="nota-item-restaurar" data-idx="${i}">↩ Restaurar</button>
               </div>
             `).join('')}
           </div>
         `;
       },
+      onMount: function () {
+        document.querySelectorAll('.nota-item-restaurar').forEach(btn => {
+          btn.onclick = () => {
+            const idx = parseInt(btn.dataset.idx);
+            let items = [];
+            try { items = JSON.parse(localStorage.getItem('redteam-notas-historial') || '[]'); } catch (e) { items = []; }
+            if (items[idx]) {
+              const ta = document.getElementById('sidebarNotas');
+              if (ta) {
+                ta.value = items[idx].texto;
+                localStorage.setItem('redteam-notas', items[idx].texto);
+                ta.dispatchEvent(new Event('input'));
+              }
+              if (typeof cerrarSeccion === 'function') cerrarSeccion();
+            }
+          };
+        });
+      }
     },
     favoritas: {
       icono: '⭐',
       titulo: 'Favoritas',
       html: function () {
+        let items = [];
+        try { items = JSON.parse(localStorage.getItem('redteam-notas-favoritas') || '[]'); } catch (e) { items = []; }
+        if (items.length === 0) {
+          return '<div class="nota-vacio">⭐ Sin favoritas todavía. Escribí en el cuaderno y hacé click en ⭐ Favorita.</div>';
+        }
         return `
           <div class="nota-lista">
-            <div class="nota-item">
-              <div class="nota-item-texto"><b>📌 Cheatsheet SQLi</b><br>
-                <small>\\' OR 1=1 -- es el clásico. En INSERT: \\', \\'x\\', \\'x\\'); --</small>
+            ${items.map((item, i) => `
+              <div class="nota-item" data-fav-idx="${i}">
+                <div class="nota-item-fecha">${new Date(item.fecha).toLocaleString('es-AR')}</div>
+                <div class="nota-item-texto">${item.texto.slice(0, 200).replace(/</g, '&lt;')}${item.texto.length > 200 ? '...' : ''}</div>
+                <div class="nota-item-acciones">
+                  <button class="nota-item-restaurar" data-fav-idx="${i}">↩ Restaurar</button>
+                  <button class="nota-item-borrar" data-fav-idx="${i}">🗑️ Borrar</button>
+                </div>
               </div>
-            </div>
-            <div class="nota-item">
-              <div class="nota-item-texto"><b>📌 Comandos curl</b><br>
-                <small>curl -X POST url -d '{"key":"value"}' -H 'Content-Type: application/json'</small>
-              </div>
-            </div>
-            <div class="nota-item">
-              <div class="nota-item-texto"><b>📌 5 grupos del Detective</b><br>
-                <small>URLs / Validación / SQLi / Auth / Info Disclosure</small>
-              </div>
-            </div>
+            `).join('')}
           </div>
-          <p class="nota-ayuda">Marcá cualquier nota como favorita y va a aparecer acá. (Próximamente)</p>
         `;
       },
+      onMount: function () {
+        document.querySelectorAll('.nota-item[data-fav-idx] .nota-item-restaurar').forEach(btn => {
+          btn.onclick = () => {
+            const idx = parseInt(btn.dataset.favIdx);
+            let items = [];
+            try { items = JSON.parse(localStorage.getItem('redteam-notas-favoritas') || '[]'); } catch (e) { items = []; }
+            if (items[idx]) {
+              const ta = document.getElementById('sidebarNotas');
+              if (ta) {
+                ta.value = items[idx].texto;
+                localStorage.setItem('redteam-notas', items[idx].texto);
+                ta.dispatchEvent(new Event('input'));
+              }
+              if (typeof cerrarSeccion === 'function') cerrarSeccion();
+            }
+          };
+        });
+        document.querySelectorAll('.nota-item[data-fav-idx] .nota-item-borrar').forEach(btn => {
+          btn.onclick = () => {
+            const idx = parseInt(btn.dataset.favIdx);
+            let items = [];
+            try { items = JSON.parse(localStorage.getItem('redteam-notas-favoritas') || '[]'); } catch (e) { items = []; }
+            items.splice(idx, 1);
+            localStorage.setItem('redteam-notas-favoritas', JSON.stringify(items));
+            // Re-render
+            const cont = document.getElementById('nota-seccion-cuerpo');
+            if (cont && typeof abrirSeccion === 'function') abrirSeccion('favoritas', null);
+          };
+        });
+      }
     },
     exportar: {
       icono: '📤',
@@ -429,17 +443,10 @@
       }
     }
 
-    // Insertar panel Apariencia ARRIBA del h4 "TUS NOTAS" (o del contenido)
+    // El textarea y los botones del cuaderno (sidebar.js) se renderizan en la sidebar.
+    // Acá solo agregamos el menú de navegación (Historial, Favoritas, etc.) DESPUÉS del h4.
     const h4 = notesPanel.querySelector('h4');
-    console.log('notas.js init: ENTRÉ al bloque del h4, notesPanel.id =', notesPanel.id, 'h4 =', h4 ? h4.outerHTML.slice(0, 100) : 'null');
     if (h4 && h4.parentNode) {
-      // Ocultar el textarea viejo y los botones viejos (ahora viven en la sección del cuerpo)
-      const viejoTextarea = notesPanel.querySelector('#sidebarNotas');
-      const viejaAcciones = notesPanel.querySelector('.acciones');
-      const viejoStatus = notesPanel.querySelector('.save-status');
-      if (viejoTextarea) viejoTextarea.style.display = 'none';
-      if (viejaAcciones) viejaAcciones.style.display = 'none';
-      if (viejoStatus) viejoStatus.style.display = 'none';
 
       // Crear contenedor arriba de todo
       const wrap = document.createElement('div');

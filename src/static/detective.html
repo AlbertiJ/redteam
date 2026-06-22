@@ -22,7 +22,30 @@
       overflow-wrap: break-word;
       word-wrap: break-word;
     }
-    .bug-card.resuelto { border-left-color: var(--color-exito, #10b981); opacity: 0.85; }
+    .bug-card.resuelto {
+      border-left-color: var(--color-exito, #10b981);
+      background: rgba(16, 185, 129, 0.06);
+      position: relative;
+    }
+    .bug-card.resuelto::after {
+      content: "✅";
+      position: absolute;
+      top: 0.7rem;
+      right: 0.8rem;
+      font-size: 1.3rem;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+    }
+    .bug-card.resuelto .bug-num {
+      background: var(--color-exito, #10b981) !important;
+    }
+    .bug-head {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.2rem;
+    }
+    .bug-head .bug-num { margin-right: 0; }
     .bug-num {
       display: inline-block;
       background: var(--accent, #1877f2);
@@ -119,6 +142,7 @@
   <script src="/static/auth.js"></script>
   <script src="/static/notas.js"></script>
   <script src="/static/topbar.js"></script>
+  <script src="/static/detective-tiempo.js"></script>
 </head>
 <body data-brightness="100">
   <div class="brightness-bar" id="brightnessBar" style="display:none;">
@@ -165,9 +189,11 @@
     <p class="muted">El bug más común en frontend. Aparece cuando concatenás strings en vez de armar la URL bien. <b>Probalo vos</b>: abrí <a href="/static/dbbuilder.html?db=musica" class="bug-link-archivo">/static/dbbuilder.html?db=musica</a> y mirá la URL que se genera en la sección "Consultar por URL".</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="1a">
+      <div class="bug-head">
         <span class="bug-num">1A</span>
         <span class="bug-dificultad baja">Fácil</span>
-        <h3 class="bug-titulo">URL duplicada en dbbuilder.html</h3>
+      </div>
+      <h3 class="bug-titulo">URL duplicada en dbbuilder.html</h3>
         <p>En el archivo <code>src/static/dbbuilder.html</code>, función <code>actualizarURLGenerada</code>.</p>
         <div class="bug-pista">💡 <b>Pista</b>: el "host" aparece dos veces en la misma URL. Mirá bien la concatenación.</div>
         <div class="bug-pasos">
@@ -187,9 +213,11 @@
       </div>
 
       <div class="bug-card" data-bug="1b">
+      <div class="bug-head">
         <span class="bug-num">1B</span>
         <span class="bug-dificultad media">Medio</span>
-        <h3 class="bug-titulo">URL mal concatenada con query params</h3>
+      </div>
+      <h3 class="bug-titulo">URL mal concatenada con query params</h3>
         <p>En <code>dbbuilder.html</code>, función <code>actualizarURLGenerada</code>.</p>
         <div class="bug-pista">💡 <b>Pista</b>: el operador <code>+</code> se mete con template literals. Y los valores no se codifican para URL.</div>
         <div class="bug-pasos">
@@ -215,9 +243,11 @@ if (campo) url += `&campo=${encodeURIComponent(campo)}`;</span></div>
     <p class="muted">El usuario puede mandar lo que quiera. Si no validás, el server hace cualquier cosa. <b>Probalo vos</b>: <a href="/static/dbbuilder.html" class="bug-link-archivo">andá a la página del dbbuilder</a> y mirá el formulario "Crear DB Custom".</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="2a">
+      <div class="bug-head">
         <span class="bug-num">2A</span>
         <span class="bug-dificultad baja">Fácil</span>
-        <h3 class="bug-titulo">No validar input vacío</h3>
+      </div>
+      <h3 class="bug-titulo">No validar input vacío</h3>
         <p>En <code>src/app.py</code>, endpoint <code>/api/v1/dbbuilder/crear</code>.</p>
         <div class="bug-pista">💡 <b>Pista</b>: si el usuario manda <code>{"nombre": ""}</code>, el server ¿qué hace? ¿Devuelve error o crea una DB fantasma?</div>
         <div class="bug-probar">
@@ -245,9 +275,11 @@ if not nombre:
       </div>
 
       <div class="bug-card" data-bug="2b">
+      <div class="bug-head">
         <span class="bug-num">2B</span>
         <span class="bug-dificultad media">Medio</span>
-        <h3 class="bug-titulo">Tipo de dato incorrecto</h3>
+      </div>
+      <h3 class="bug-titulo">Tipo de dato incorrecto</h3>
         <p>En <code>app.py</code>, endpoint <code>/api/v1/dbbuilder/consultar</code>.</p>
         <div class="bug-pista">💡 <b>Pista</b>: si el usuario manda <code>limite=uchos</code>, el server ¿qué hace? Probálo: <a href="/api/v1/dbbuilder/consultar?db=musica&limite=uchos" target="_blank" class="bug-link-archivo">abrir este link</a>.</div>
         <div class="bug-pasos">
@@ -275,9 +307,11 @@ limite = max(1, min(1000, limite))</span></div>
     <p class="muted">El clásico. OWASP Top 1 histórico. Si concatenás input del usuario en una query SQL, estás regalando tu DB. <b>Probalo vos</b>: <a href="/api/v1/dbbuilder/consultar?db=musica&filtro=artista=' OR '1'='1" target="_blank" class="bug-link-archivo">mirá este endpoint</a> y pensá qué pasa con el filtro.</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="3a">
+      <div class="bug-head">
         <span class="bug-num">3A</span>
         <span class="bug-dificultad alta">Alto</span>
-        <h3 class="bug-titulo">Concatenar input en SELECT</h3>
+      </div>
+      <h3 class="bug-titulo">Concatenar input en SELECT</h3>
         <p>En <code>app.py</code>, función <code>api_dbbuilder_consultar</code>.</p>
         <div class="bug-pista">💡 <b>Pista</b>: el query se arma con f-string <code>f"...{input}..."</code> o con <code>+</code>. Cualquier input del usuario debería ir como placeholder <code>?</code>.</div>
         <div class="bug-pasos">
@@ -297,9 +331,11 @@ cursor.execute(sql, (f"%{filtro}%",))  // parametrizado, seguro</span></div>
       </div>
 
       <div class="bug-card" data-bug="3b">
+      <div class="bug-head">
         <span class="bug-num">3B</span>
         <span class="bug-dificultad alta">Alto</span>
-        <h3 class="bug-titulo">INSERT sin prepared statements</h3>
+      </div>
+      <h3 class="bug-titulo">INSERT sin prepared statements</h3>
         <p>En <code>db/db.py</code>, función de insert.</p>
         <div class="bug-pista">💡 <b>Pista</b>: el INSERT arma los VALUES concatenando strings. Cualquier input del usuario debería ir como placeholder <code>?</code>.</div>
         <div class="bug-pasos">
@@ -323,9 +359,11 @@ conn.execute(f"INSERT INTO (tabla) ({cols_quoted}) VALUES ({placeholders})", tup
     <p class="muted">El usuario es anónimo hasta que demuestre lo contrario. Si dejás cosas sin auth, son públicas. <b>Probalo vos</b>: <a href="/api/v1/auth/admin" target="_blank" class="bug-link-archivo">abrir /api/v1/auth/admin sin estar logueado</a>.</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="4a">
+      <div class="bug-head">
         <span class="bug-num">4A</span>
         <span class="bug-dificultad media">Medio</span>
-        <h3 class="bug-titulo">Credenciales hardcoded</h3>
+      </div>
+      <h3 class="bug-titulo">Credenciales hardcoded</h3>
         <p>En <code>app.py</code>, en algún lugar de la config.</p>
         <div class="bug-pista">💡 <b>Pista</b>: las credenciales están escritas en el código fuente. Cualquiera que abre el repo las ve. Debería abrir el repo las ve. Debería leerlas de variables de entorno sin default.</div>
         <div class="bug-pasos">
@@ -349,9 +387,11 @@ if not DB_PASSWORD or not API_KEY:
       </div>
 
       <div class="bug-card" data-bug="4b">
+      <div class="bug-head">
         <span class="bug-num">4B</span>
         <span class="bug-dificultad alta">Alto</span>
-        <h3 class="bug-titulo">Token que no expira</h3>
+      </div>
+      <h3 class="bug-titulo">Token que no expira</h3>
         <p>En <code>app.py</code>, sistema de tokens (si existe).</p>
         <div class="bug-pista">💡 <b>Pista</b>: el token se genera una vez y sirve para siempre. Si te lo roban, no hay forma de invalidarlo.</div>
         <div class="bug-pasos">
@@ -375,9 +415,11 @@ if not DB_PASSWORD or not API_KEY:
     <p class="muted">El server cuenta demasiado. Versiones, paths internos, configs. Toda esa info se le sirve al atacante. <b>Probalo vos</b>: <a href="/api/v1/metadatos" target="_blank" class="bug-link-archivo">abrir /api/v1/metadatos</a> y mirá qué devuelve.</p>
     <div class="detective-bugs">
       <div class="bug-card" data-bug="5a">
+      <div class="bug-head">
         <span class="bug-num">5A</span>
         <span class="bug-dificultad baja">Fácil</span>
-        <h3 class="bug-titulo">Stack trace visible en errores</h3>
+      </div>
+      <h3 class="bug-titulo">Stack trace visible en errores</h3>
         <p>En <code>app.py</code>, default exception handler.</p>
         <div class="bug-pista">💡 <b>Pista</b>: cuando algo tira error 500, el server muestra TODO el stack trace. Eso le dice al atacante dónde está el código y qué libs usás.</div>
         <div class="bug-probar">
@@ -400,9 +442,11 @@ return JSONResponse(status_code=500, content={"error": "Error interno del servid
       </div>
 
       <div class="bug-card" data-bug="5b">
+      <div class="bug-head">
         <span class="bug-num">5B</span>
         <span class="bug-dificultad media">Medio</span>
-        <h3 class="bug-titulo">Endpoint /debug que filtra config</h3>
+      </div>
+      <h3 class="bug-titulo">Endpoint /debug que filtra config</h3>
         <p>En <code>app.py</code>, el endpoint <code>/api/v1/debug</code>.</p>
         <div class="bug-pista">💡 <b>Pista</b>: el endpoint <code>/api/v1/debug</code> está accesible sin auth y devuelve variables de entorno sensibles. Solo accesible si DEV_MODE está activado.</div>
         <div class="bug-pasos">

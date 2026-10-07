@@ -40,3 +40,11 @@ src/db/activity.db
 src/db/time_travel.db
 usuarios/
 redteam.log
+
+# Secretos y datos locales (no subir nunca)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.session

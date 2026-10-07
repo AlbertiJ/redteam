@@ -20,6 +20,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import uvicorn
 from mejoras import router as mejoras_router
+from filtro_seguro import evaluar_filtro
 from usuarios import login as usuario_login, logout as usuario_logout, cargar_usuario, guardar_usuario, obtener_dashboard, registrar_bug_resuelto, registrar_db_custom, sumar_tiempo, obtener_ranking
 import json
 import os
@@ -451,13 +452,7 @@ def consultar_db(
         data = DB_PREDEFINIDAS[db]["datos"]
         if filtro:
             try:
-                filtrados = []
-                for row in data:
-                    eval_globals = {"__builtins__": {}}
-                    eval_locals = {c: row.get(c) for c in row.keys()}
-                    if eval(filtro, eval_globals, eval_locals):
-                        filtrados.append(row)
-                data = filtrados
+                data = [row for row in data if evaluar_filtro(filtro, row)]
             except Exception as e:
                 return {"error": f"Filtro inválido: {e}", "datos": []}
         if campo:

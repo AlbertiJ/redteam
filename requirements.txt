@@ -5,4 +5,4 @@ requests>=2.31.0
 
 # Tests (opcional, para correr la suite de pytest-bdd)
 pytest>=8.0.0
-pytest-bdd>=8.0.0
+pytest-bdd>=9.0.0

@@ -4,5 +4,5 @@ pydantic>=2.0.0
 requests>=2.31.0
 
 # Tests (opcional, para correr la suite de pytest-bdd)
-pytest>=8.0.0
+pytest>=9.1.1
 pytest-bdd>=8.0.0

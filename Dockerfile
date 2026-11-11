@@ -1,7 +1,7 @@
 # API-Eye Lab - Dockerfile
 # Imagen basada en Python slim para mantener el tamaño chico
 
-FROM python:3.11-slim
+FROM python:3.15-slim
 
 # Metadata
 LABEL maintainer="API-Eye Lab"
